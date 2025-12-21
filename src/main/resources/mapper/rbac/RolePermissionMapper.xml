@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.template.app.features.rbac.repository.RolePermissionRepository">
+
+    <insert id="assignPermissionToRole">
+        INSERT INTO role_permissions (role_id, permission_id) VALUES (#{roleId}, #{permissionId})
+    </insert>
+
+    <delete id="deletePermissionsByRoleId">
+        DELETE FROM role_permissions 
+        WHERE role_id = #{roleId}
+    </delete>
+
+</mapper>

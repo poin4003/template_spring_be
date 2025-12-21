@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.template.app.features.ops.repository.ServiceEndpointConfigRepository">
+
+    <resultMap id="BaseResultMap" type="com.template.app.features.ops.entity.ServiceEndpointConfigEntity">
+        <id column="service_endpoint_config_id" property="serviceEndpointConfigId" />
+        
+        <result column="endpoint_type" property="endpointType" />
+        <result column="endpoint_status" property="endpointStatus" />
+        
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+    <select id="findActiveMqConfigs" resultMap="BaseResultMap">
+        SELECT * FROM service_endpoint_configs 
+        WHERE endpoint_status = 1 
+          AND endpoint_type = 1
+    </select>
+
+</mapper>

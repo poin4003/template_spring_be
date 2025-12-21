@@ -1,0 +1,65 @@
+version: "3.9"
+services:
+  # Kafka visualization tool
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "9090:8080"
+    depends_on:
+      kafka1:
+        condition: service_healthy
+    environment:
+      KAFKA_CLUSTERS_0_NAME: kafka1
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:9092
+      DYNAMIC_CONFIG_ENABLED: 'true'
+
+  # Kafka cluster
+  kafka1:
+    image: 'confluentinc/cp-kafka:7.5.0'
+    container_name: kafka1
+    ports:
+      - 9193:9094
+    user: root
+    environment:
+      ### General configurations
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      
+      # Define Kafka server-side socket listening ports
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      
+      # Define security protocols
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      
+      # Set advertised listener
+      - KAFKA_ADVERTISED_LISTENERS=EXTERNAL://localhost:9193,PLAINTEXT://kafka1:9092
+      
+      # Interbroker listener name
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      
+      # Cluster address
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093
+       
+      # Set maximum and initial memory for the broker
+      - KAFKA_HEAP_OPTS=-Xmx512M -Xms256M
+      
+      # Enable auto-creation of topics
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      
+      # Message retention period (in milliseconds), set to 7 days
+      - KAFKA_LOG_RETENTION_MS=604800000
+      
+      ### Broker configurations
+      - KAFKA_NODE_ID=1
+      
+      - CLUSTER_ID=mkY-MRi-T9q2AEE-fN-O3A 
+      
+    volumes:
+      - ./data/confluent/kafka1:/var/lib/kafka/data
+      
+    healthcheck:
+      test: [ "CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "localhost:9092" ]
+      interval: 5s
+      timeout: 10s
+      retries: 10

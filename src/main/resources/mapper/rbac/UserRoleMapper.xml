@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.template.app.features.rbac.repository.UserRoleRepository">
+
+    <insert id="assignRoleToUser">
+        INSERT INTO user_roles (user_id, role_id) VALUES (#{userId}, #{roleId})
+    </insert>
+
+    <delete id="removeRoleFromUser">
+        DELETE FROM user_roles 
+        WHERE user_id = #{userId} AND role_id = #{roleId}
+    </delete>
+
+    <delete id="deleteRolesByUserId">
+        DELETE FROM user_roles 
+        WHERE user_id = #{userId}
+    </delete>
+
+</mapper>

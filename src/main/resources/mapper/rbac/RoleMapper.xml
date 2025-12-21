@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.template.app.features.rbac.repository.RoleRepository">
+
+    <resultMap id="RoleWithPermissionsMap" type="com.template.app.features.rbac.entity.RoleEntity">
+        <id property="roleId" column="role_id"/>
+        <collection property="permissions" 
+                    ofType="com.template.app.features.rbac.entity.PermissionEntity"
+                    select="com.template.app.features.rbac.repository.PermissionRepository.selectPermissionByRoleId" 
+                    column="role_id"/>
+    </resultMap>
+
+    <select id="selectRolesByUserId" resultMap="RoleWithPermissionsMap">
+        SELECT r.role_id, r.role_name, r.role_key
+        FROM roles r
+        JOIN user_roles ur ON r.role_id = ur.role_id
+        WHERE ur.user_id = #{userId}
+    </select>
+
+</mapper>

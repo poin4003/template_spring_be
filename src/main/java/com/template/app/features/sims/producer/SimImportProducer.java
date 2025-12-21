@@ -1,0 +1,38 @@
+package com.template.app.features.sims.producer;
+
+import java.util.UUID;
+
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.stereotype.Component;
+
+import com.template.app.features.sims.service.schema.command.SimCmd;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class SimImportProducer {
+
+    private static final String TOPIC_NAME = "import-sim-topic";
+    private final KafkaTemplate<String, SimCmd> kafkaTemplate;
+
+    public void sendSimToImportQueue(SimCmd cmd) {
+        log.info("Sending SIM with phone number {} to kafka topic {}",
+                cmd.getSimPhoneNumber(), TOPIC_NAME);
+
+        String simKey = cmd.getSimPhoneNumber() + "-" + UUID.randomUUID().toString();
+
+        org.springframework.messaging.Message<SimCmd> message = MessageBuilder
+                                                                        .withPayload(cmd)
+                                                                        .setHeader(KafkaHeaders.TOPIC, TOPIC_NAME)
+                                                                        .setHeader(KafkaHeaders.KEY, simKey)
+                                                                        .setHeader("__TypeId__", SimCmd.class.getName())
+                                                                        .build();
+
+        kafkaTemplate.send(message);
+    }
+}
