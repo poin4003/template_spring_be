@@ -1,12 +1,15 @@
 package com.template.app.features.ops.entity;
 
+import java.util.Map;
 import java.util.UUID;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.template.app.base.BaseEntity;
+import com.template.app.features.ops.enums.MqAckStrategyEnum;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,36 +22,59 @@ public class MqConsumerDetailEntity extends BaseEntity {
      * PK also FK for ServiceEndpointConfigEntity
      */
     @TableId(value="service_endpoint_config_id", type=IdType.ASSIGN_UUID)
-    private UUID configId;
+    private UUID endpointConfigId;
 
     /**
      * Source name:
-     * Topic name or queue name
+     * Topic / Queue / Stream / Channel
      */
     @TableField("source_name")
     private String sourceName;
 
     /**
-     * Group consumer
+     * Group consumer:
+     * GroupId / ConsumerTag / Queue group
      */
-    @TableField("group_id")
-    private String groupId;
+    @TableField("consumer_group")
+    private String consumerGroup;
 
     /**
-     * Parallel threads
+     * Parallel threads:
+     * concurrency / concurrent consumers
      */
-    @TableField("concurrency")
-    private Integer concurrency;
+    @TableField("parallelism")
+    private Integer parallelism;
 
     /**
-     * Function in bean to get message
+     * Handler identifier (semantic key, resolved by registry)
      */
-    @TableField("target_bean")
-    private String targetBean;
+    @TableField("handler_key")
+    private String handlerKey;
 
     /**
-     * Function name to handle message
+     * Method name
      */
-    @TableField("target_method")
-    private String targetMethod;
+    @TableField("handler_method")
+    private String handlerMethod;
+
+    /**
+     * Mq ack stategy
+     * AUTO / MANUAL
+     */
+    @TableField("ack_strategy")
+    private MqAckStrategyEnum ackStrategy;
+
+    /**
+     * Retry mode
+     * ENABLE / DISABLE retry
+     */
+    @TableField("retry_enabled")
+    private Boolean retryEnabled;
+
+    /**
+     * Mq config
+     * Transport-specific override config (optional)
+     */
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private Map<String, Object> transportConfig;
 }

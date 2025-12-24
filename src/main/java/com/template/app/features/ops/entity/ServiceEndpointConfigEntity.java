@@ -17,6 +17,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @TableName("service_endpoint_configs")
 public class ServiceEndpointConfigEntity extends BaseEntity {
+
     @TableId(value="service_endpoint_config_id", type=IdType.ASSIGN_UUID)
     private UUID serviceEndpointConfigId;
 

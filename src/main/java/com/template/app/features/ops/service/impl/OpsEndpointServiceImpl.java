@@ -3,6 +3,7 @@ package com.template.app.features.ops.service.impl;
 import java.util.List;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@Lazy(false)
 @RequiredArgsConstructor
 public class OpsEndpointServiceImpl implements OpsEndpointService {
 
@@ -45,7 +47,12 @@ public class OpsEndpointServiceImpl implements OpsEndpointService {
                     if (isSuccess) successCount++;
                 }
             } catch (Exception e) {
-                log.error("Error when process Config ID: {}", config.getServiceEndpointConfigId());
+                log.error(
+                    "[OPS][INIT][FAILED] configId={} endpointType={}",
+                    config.getServiceEndpointConfigId(),
+                    config.getEndpointType(),
+                    e
+                );
             }
         }
 
@@ -66,6 +73,7 @@ public class OpsEndpointServiceImpl implements OpsEndpointService {
         MqConsumerRegistrationCmd cmd = opsCoreMapStruct.toMqCmd(config, detail);
 
         dynamicMqListenerService.registerMqConsumer(cmd);
+        
         return true;
     }
 }

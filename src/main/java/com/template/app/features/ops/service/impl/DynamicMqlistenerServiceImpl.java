@@ -1,14 +1,24 @@
 package com.template.app.features.ops.service.impl;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
-import org.springframework.context.ApplicationContext;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.config.MethodKafkaListenerEndpoint;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.stereotype.Service;
 
+import com.template.app.core.messaging.MessageHandler;
+import com.template.app.core.messaging.MessageHandlerRegistry;
 import com.template.app.features.ops.service.DynamicMqListenerService;
 import com.template.app.features.ops.service.schema.command.MqConsumerRegistrationCmd;
 
@@ -20,67 +30,105 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
     
-    private final ApplicationContext applicationContext;
     private final KafkaListenerEndpointRegistry kafkaRegistry;
-
-    private final ConcurrentKafkaListenerContainerFactory<String, Object> kafkaContainerFactory;
+    private final MessageHandlerRegistry handlerRegistry;
+    private final KafkaProperties kafkaProperties;
+    private final DefaultErrorHandler errorHandler;
+    private final MessageHandlerMethodFactory handlerMethodFactory;
 
     @Override
     public void registerMqConsumer(MqConsumerRegistrationCmd cmd) {
-        if (cmd == null) return;
-
-        log.info("--> [WORKER] Has begin to register to kafka consumer: {}", cmd.getListenerId());
-
-        try {
-            String listenerId = Objects.requireNonNull(cmd.getListenerId(), "ListenerID is required");
-            String groupId = Objects.requireNonNull(cmd.getGroupId(), "GroupId is required");
-            String sourceName = Objects.requireNonNull(cmd.getSourceName(), "Topic is required");
-            String targetBean = Objects.requireNonNull(cmd.getTargetBean(), "TargetBean is required");
-            String targetMethod = Objects.requireNonNull(cmd.getTargetMethod(), "TargetMethod is required");
-
-            Object bean = applicationContext.getBean(targetBean);
-
-            MethodKafkaListenerEndpoint<String, Object> endpoint = new MethodKafkaListenerEndpoint<>();
-
-            endpoint.setId(listenerId);
-            endpoint.setGroupId(groupId);
-            endpoint.setTopics(sourceName);
-            endpoint.setBean(bean);
-
-            if (cmd.getConcurrency() != null) {
-                endpoint.setConcurrency(Objects.requireNonNull(cmd.getConcurrency()));
-            }
-
-            endpoint.setBean(bean);
-
-            Method method = Objects.requireNonNull(
-                findTargetMethod(bean, targetMethod),
-                "Method result required"
-            );
-            endpoint.setMethod(method);
-
-            kafkaRegistry.registerListenerContainer(
-                endpoint, 
-                Objects.requireNonNull(kafkaContainerFactory, "ContainerFactory is required"),
-                true
-            );
-
-            log.info("--> [SUCCESS] Consumer started: Topic='{}', Bean='{}'", cmd.getSourceName(), cmd.getTargetBean());
-
-        } catch (Exception e) {
-            log.error("--> [FAILED] error to register kafka listener id {}: {}", cmd.getListenerId(), e.getMessage());
-            throw new RuntimeException(e);
+        if (cmd == null) {
+            log.warn("Skip registerMqConsumer: cmd is null");
+            return;
         }
+
+        Objects.requireNonNull(cmd.getEndpointId(), "endpointId is required");
+        Objects.requireNonNull(cmd.getHandlerKey(), "handlerKey is required");
+        Objects.requireNonNull(cmd.getSourceName(), "sourceName is required");
+        Objects.requireNonNull(cmd.getConsumerGroup(), "consumerGroup is required");
+
+        String listenerId = "dynamic-mq-" + cmd.getEndpointId();
+
+        MessageHandler<?> handler = Objects.requireNonNull(
+            handlerRegistry.get(cmd.getHandlerKey()),
+            "MessageHandler not found for key: " + cmd.getHandlerKey()
+        );
+
+        Method handlerMethod = resolveHandlerMethod(handler);
+
+        MethodKafkaListenerEndpoint<String, Object> endpoint =
+            new MethodKafkaListenerEndpoint<>();
+
+        endpoint.setId(listenerId);
+        endpoint.setGroupId(cmd.getConsumerGroup());
+        endpoint.setTopics(cmd.getSourceName());
+        endpoint.setBean(handler);
+        endpoint.setMethod(
+            Objects.requireNonNull(handlerMethod, "handlerMethod must not be null")
+        );
+        endpoint.setMessageHandlerMethodFactory(handlerMethodFactory);
+
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
+            Objects.requireNonNull(
+                buildContainerFactory(cmd),
+                "KafkaListenerContainerFactory must not be null"
+            );
+
+        kafkaRegistry.registerListenerContainer(endpoint, factory, true);
+
+        log.info(
+            "Kafka consumer [{}] started | topic={} | handler={}",
+            listenerId,
+            cmd.getSourceName(),
+            cmd.getHandlerKey()
+        );
     }
 
-    private Method findTargetMethod(Object bean, String methodName) {
-        for (Method m : bean.getClass().getMethods()) {
-            if (m.getName().equals(methodName)) {
+    private Method resolveHandlerMethod(Object handler) {
+        Objects.requireNonNull(handler, "handler must not be null");
+
+        for (Method m : handler.getClass().getMethods()) {
+            if ("handle".equals(m.getName()) && m.getParameterCount() == 1) {
                 return m;
             }
         }
-        throw new IllegalArgumentException(
-            String.format("Not found method: '%s' in bean '%s'", methodName, bean.getClass().getName())
+
+        throw new IllegalStateException(
+            "MessageHandler must define method: handle(T payload)"
         );
+    }
+
+    private ConcurrentKafkaListenerContainerFactory<String, Object> buildContainerFactory(MqConsumerRegistrationCmd cmd) {
+        Map<String, Object> props = new HashMap<>(kafkaProperties.buildConsumerProperties());
+
+        if (cmd.getTransportConfig() != null) {
+            props.putAll(cmd.getTransportConfig());
+        }
+
+        JsonDeserializer<Object> valueDeserializer = new JsonDeserializer<>();
+        valueDeserializer.addTrustedPackages("*");
+        valueDeserializer.setUseTypeHeaders(false);
+        valueDeserializer.setRemoveTypeHeaders(false);
+
+        ConsumerFactory<String, Object> consumerFactory =
+            new DefaultKafkaConsumerFactory<>(
+                props,
+                new StringDeserializer(),
+                valueDeserializer
+            );
+
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
+            new ConcurrentKafkaListenerContainerFactory<>();
+
+        factory.setConsumerFactory(consumerFactory);
+        factory.setCommonErrorHandler(errorHandler);
+
+        Integer parallelism = cmd.getParallelism();
+        if (parallelism != null) {
+            factory.setConcurrency(parallelism);
+        }
+
+        return factory;
     }
 }

@@ -1,5 +1,8 @@
 package com.template.app.features.ops.service.schema.command;
 
+import java.util.Map;
+import java.util.UUID;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -7,16 +10,18 @@ import lombok.Data;
 @Builder
 public class MqConsumerRegistrationCmd {
 
-    private String listenerId;
+    private UUID endpointId;
 
     private String sourceName;
 
-    private String groupId;
+    private String consumerGroup;
 
-    private Integer concurrency;
+    private Integer parallelism;
 
-    private String targetBean;
+    private String handlerKey;
 
-    private String targetMethod;
+    private String handlerMethod;
+
+    private Map<String, Object> transportConfig;
 
 }

@@ -15,7 +15,13 @@ import com.template.app.features.ops.service.schema.command.MqConsumerRegistrati
 )
 public interface OpsCoreMapStruct {
     
-    @Mapping(target = "listenerId", expression = "java(\"dynamic-mq-\" + config.getServiceEndpointConfigId())")
+    @Mapping(target = "endpointId", source = "config.serviceEndpointConfigId")
+    @Mapping(target = "sourceName", source = "detail.sourceName")
+    @Mapping(target = "consumerGroup", source = "detail.consumerGroup")
+    @Mapping(target = "parallelism", source = "detail.parallelism")
+    @Mapping(target = "handlerKey", source = "detail.handlerKey")
+    @Mapping(target = "handlerMethod", source = "detail.handlerMethod")
+    @Mapping(target = "transportConfig", source = "detail.transportConfig") 
     MqConsumerRegistrationCmd toMqCmd(ServiceEndpointConfigEntity config, MqConsumerDetailEntity detail);
 
 }

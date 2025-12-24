@@ -4,6 +4,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.listener.ListenerExecutionFailedException;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
+import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.util.backoff.FixedBackOff;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
@@ -17,7 +20,7 @@ public class MyKafkaConfig {
 
     @Bean
     public DefaultErrorHandler commonErrorHandler() {
-        FixedBackOff fixedBackOff = new FixedBackOff(0L, 3);
+        FixedBackOff fixedBackOff = new FixedBackOff(1000L, 3);
 
         DefaultErrorHandler errorHandler = new DefaultErrorHandler((consumerRecord, exception) -> {
             try {
@@ -40,5 +43,13 @@ public class MyKafkaConfig {
         );
 
         return errorHandler;
+    }
+
+    @Bean
+    public MessageHandlerMethodFactory kafkaHandlerMethodFactory() {
+        DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
+
+        factory.setMessageConverter(new MappingJackson2MessageConverter());
+        return factory;
     }
 }

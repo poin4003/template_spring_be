@@ -2,6 +2,7 @@ package com.template.app.features.sims.consumer;
 
 import org.springframework.stereotype.Component;
 
+import com.template.app.core.messaging.MessageHandler;
 import com.template.app.features.sims.service.SimService;
 import com.template.app.features.sims.service.schema.command.SimCmd;
 import com.template.app.features.sims.service.schema.result.SimResult;
@@ -10,13 +11,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
+@Component("simImportConsumer")
 @RequiredArgsConstructor
-public class SimImportConsumer {
+public class SimImportConsumer implements MessageHandler<SimCmd> {
 
     private final SimService simService;
- 
-    public void importSingleSim(SimCmd cmd) {
+    
+    @Override
+    public void handle(SimCmd cmd) {
 
         if (cmd == null) {
             log.error("Received null request due to deserialization error. Skipping");

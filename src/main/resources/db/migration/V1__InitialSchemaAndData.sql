@@ -172,12 +172,15 @@ CREATE TABLE sims (
 ----------------------------------------------------
 CREATE TABLE service_endpoint_configs (
     service_endpoint_config_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    
+
     endpoint_type INT NOT NULL,
-    endpoint_status INT NOT NULL, 
- 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    endpoint_status INT NOT NULL,
+
+    -- BaseEntity columns
+    note TEXT,
+    description TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 ----------------------------------------------------
@@ -185,20 +188,30 @@ CREATE TABLE service_endpoint_configs (
 ----------------------------------------------------
 CREATE TABLE mq_consumer_details (
     service_endpoint_config_id UUID PRIMARY KEY,
-    
-    source_name VARCHAR(255) NOT NULL,
-    group_id VARCHAR(255) NOT NULL,
-    concurrency INT DEFAULT 1,
-    target_bean VARCHAR(255) NOT NULL,
-    target_method VARCHAR(255) NOT NULL,
-    
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_mq_config_parent 
-        FOREIGN KEY (service_endpoint_config_id) 
+    source_name VARCHAR(255) NOT NULL,
+    consumer_group VARCHAR(255) NOT NULL,
+
+    parallelism INT DEFAULT 1,
+
+    handler_key VARCHAR(255) NOT NULL,
+    handler_method VARCHAR(255) NOT NULL,
+
+    ack_strategy INT DEFAULT 0,
+    retry_enabled BOOLEAN DEFAULT TRUE,
+
+    transport_config JSONB,
+
+    note VARCHAR(255),
+    description TEXT,
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_mq_consumer_endpoint
+        FOREIGN KEY (service_endpoint_config_id)
         REFERENCES service_endpoint_configs(service_endpoint_config_id)
-        ON DELETE CASCADE 
+        ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
@@ -261,16 +274,52 @@ BEGIN
     INSERT INTO role_permissions (role_id, permission_id)
     SELECT BUYER_RID, permission_id FROM permissions WHERE permission_key LIKE 'buyer:%';
 
-    -- 7.1 Parent config
-    INSERT INTO service_endpoint_configs 
-        (service_endpoint_config_id, endpoint_type, endpoint_status)
-    VALUES 
-        ('c9c6e9af-feb1-4464-a4e6-015c1fbd8d70', 1, 1);
+    -- 7. OPS
+    INSERT INTO service_endpoint_configs
+    (
+        service_endpoint_config_id,
+        endpoint_type,
+        endpoint_status,
+        note,
+        description
+    )
+    VALUES
+    (
+        'c9c6e9af-feb1-4464-a4e6-015c1fbd8d70',
+        1,
+        1,
+        'SIM import listener',
+        'Kafka consumer import SIM'
+    );
 
-    -- 7.2 Child config
-    INSERT INTO mq_consumer_details 
-        (service_endpoint_config_id, source_name, group_id, concurrency, target_bean, target_method)
-    VALUES 
-        ('c9c6e9af-feb1-4464-a4e6-015c1fbd8d70', 'sim-import-topic', 'sim-import-group-partner-a', 3, 'simImportConsumer', 'process');
+    INSERT INTO mq_consumer_details
+    (
+        service_endpoint_config_id,
+        source_name,
+        consumer_group,
+        parallelism,
+        handler_key,
+        handler_method,
+        ack_strategy,
+        retry_enabled,
+        transport_config,
+        note,
+        description
+    )
+    VALUES
+    (
+        'c9c6e9af-feb1-4464-a4e6-015c1fbd8d70',
+        'import-sim-topic',
+        'sim-import-group-partner-a',
+        3,
+        'simImportConsumer',
+        'handle',
+        0,
+        true,
+        '{"autoOffsetReset":"earliest"}',
+        'Main SIM import',
+        'Consumer handle import single sim'
+    );
+
 END;
 $$ LANGUAGE plpgsql;
