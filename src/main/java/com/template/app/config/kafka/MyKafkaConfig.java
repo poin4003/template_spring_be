@@ -1,9 +1,9 @@
 package com.template.app.config.kafka;
 
+import org.apache.kafka.common.errors.SerializationException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.kafka.listener.ListenerExecutionFailedException;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
@@ -37,11 +37,12 @@ public class MyKafkaConfig {
         }, fixedBackOff);
 
         errorHandler.addNotRetryableExceptions(
-            InvalidFormatException.class,
+            SerializationException.class,
             DeserializationException.class,
-            ListenerExecutionFailedException.class
+            IllegalStateException.class,
+            InvalidFormatException.class
         );
-
+ 
         return errorHandler;
     }
 

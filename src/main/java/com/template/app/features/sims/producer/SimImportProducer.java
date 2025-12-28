@@ -7,6 +7,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.stereotype.Component;
+import org.springframework.kafka.support.mapping.AbstractJavaTypeMapper;
 
 import com.template.app.features.sims.service.schema.command.SimCmd;
 
@@ -32,6 +33,10 @@ public class SimImportProducer {
                 .withPayload(cmd)
                 .setHeader(KafkaHeaders.TOPIC, TOPIC_NAME)
                 .setHeader(KafkaHeaders.KEY, simKey)
+                .setHeader(
+                    AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
+                    SimCmd.class.getSimpleName()
+                )
                 .build();
 
         kafkaTemplate.send(message);

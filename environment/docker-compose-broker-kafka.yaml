@@ -16,48 +16,41 @@ services:
 
   # Kafka cluster
   kafka1:
-    image: 'confluentinc/cp-kafka:7.5.0'
+    image: 'bitnami/kafka:3.5'
     container_name: kafka1
     ports:
-      - 9193:9094
-    user: root
+      - 9193:9094    # Port cho client bên ngoài (trên host)
     environment:
       ### General configurations
-      - KAFKA_PROCESS_ROLES=broker,controller
-      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       # Define Kafka server-side socket listening ports
-      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
-      
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
       # Define security protocols
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
-      
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       # Set advertised listener
-      - KAFKA_ADVERTISED_LISTENERS=EXTERNAL://localhost:9193,PLAINTEXT://kafka1:9092
-      
+      # PLAINTEXT: Dùng cho các service nội bộ (như kafka-ui)
+      # EXTERNAL: Dùng cho các service bên ngoài (trên máy host)
+      - KAFKA_CFG_ADVERTISED_LISTENERS=EXTERNAL://localhost:9193,PLAINTEXT://kafka1:9092
       # Interbroker listener name
-      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
-      
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       # Cluster address
-      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093
-       
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093
+      # Allow PLAINTEXT listener (default is false; not recommended for production)
+      - ALLOW_PLAINTEXT_LISTENER=yes
       # Set maximum and initial memory for the broker
       - KAFKA_HEAP_OPTS=-Xmx512M -Xms256M
-      
       # Enable auto-creation of topics
-      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
-      
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
       # Message retention period (in milliseconds), set to 7 days
       - KAFKA_LOG_RETENTION_MS=604800000
-      
       ### Broker configurations
-      - KAFKA_NODE_ID=1
-      
-      - CLUSTER_ID=mkY-MRi-T9q2AEE-fN-O3A 
-      
+      # Broker ID, must be unique
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_NODE_ID=1
     volumes:
-      - ./data/confluent/kafka1:/var/lib/kafka/data
-      
+      - ./data/bitnami/kafka1:/bitnami/kafka
     healthcheck:
       test: [ "CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "localhost:9092" ]
       interval: 5s

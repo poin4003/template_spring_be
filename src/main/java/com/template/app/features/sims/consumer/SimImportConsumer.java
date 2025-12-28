@@ -14,12 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 @Component("simImportConsumer")
 @RequiredArgsConstructor
 public class SimImportConsumer implements MessageHandler<SimCmd> {
-
+   
     private final SimService simService;
-    
+
     @Override
     public void handle(SimCmd cmd) {
-
         if (cmd == null) {
             log.error("Received null request due to deserialization error. Skipping");
             return;

@@ -13,12 +13,15 @@ import org.springframework.kafka.config.MethodKafkaListenerEndpoint;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.stereotype.Service;
 
+import com.template.app.core.messaging.LogicalTypeIdMapper;
 import com.template.app.core.messaging.MessageHandler;
 import com.template.app.core.messaging.MessageHandlerRegistry;
+import com.template.app.core.messaging.PayloadTypeRegistry;
 import com.template.app.features.ops.service.DynamicMqListenerService;
 import com.template.app.features.ops.service.schema.command.MqConsumerRegistrationCmd;
 
@@ -35,6 +38,7 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
     private final KafkaProperties kafkaProperties;
     private final DefaultErrorHandler errorHandler;
     private final MessageHandlerMethodFactory handlerMethodFactory;
+    private final PayloadTypeRegistry payloadTypeRegistry;
 
     @Override
     public void registerMqConsumer(MqConsumerRegistrationCmd cmd) {
@@ -99,17 +103,24 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
         );
     }
 
-    private ConcurrentKafkaListenerContainerFactory<String, Object> buildContainerFactory(MqConsumerRegistrationCmd cmd) {
-        Map<String, Object> props = new HashMap<>(kafkaProperties.buildConsumerProperties());
+    private ConcurrentKafkaListenerContainerFactory<String, Object>
+    buildContainerFactory(MqConsumerRegistrationCmd cmd) {
 
-        if (cmd.getTransportConfig() != null) {
-            props.putAll(cmd.getTransportConfig());
-        }
+        Map<String, Object> props =
+            new HashMap<>(kafkaProperties.buildConsumerProperties());
 
-        JsonDeserializer<Object> valueDeserializer = new JsonDeserializer<>();
-        valueDeserializer.addTrustedPackages("*");
-        valueDeserializer.setUseTypeHeaders(false);
-        valueDeserializer.setRemoveTypeHeaders(false);
+        LogicalTypeIdMapper typeMapper =
+            new LogicalTypeIdMapper(payloadTypeRegistry);
+
+        JsonDeserializer<Object> jsonDeserializer =
+            new JsonDeserializer<>();
+
+        jsonDeserializer.addTrustedPackages("*");
+        jsonDeserializer.setUseTypeHeaders(true);
+        jsonDeserializer.setTypeMapper(typeMapper);
+
+        ErrorHandlingDeserializer<Object> valueDeserializer =
+            new ErrorHandlingDeserializer<>(jsonDeserializer);
 
         ConsumerFactory<String, Object> consumerFactory =
             new DefaultKafkaConsumerFactory<>(
@@ -123,11 +134,6 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
 
         factory.setConsumerFactory(consumerFactory);
         factory.setCommonErrorHandler(errorHandler);
-
-        Integer parallelism = cmd.getParallelism();
-        if (parallelism != null) {
-            factory.setConcurrency(parallelism);
-        }
 
         return factory;
     }
