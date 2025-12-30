@@ -1,4 +1,4 @@
-package com.template.app.config.resolver;
+package com.template.app.config.processor;
 
 import org.springframework.core.MethodParameter;
 import jakarta.servlet.http.HttpServletRequest;

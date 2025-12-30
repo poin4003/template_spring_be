@@ -8,7 +8,6 @@ import org.springframework.kafka.support.mapping.AbstractJavaTypeMapper;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.template.app.features.sims.service.schema.command.SimCmd;
 
 public class LogicalTypeIdMapper extends DefaultJackson2JavaTypeMapper {
 
@@ -16,7 +15,6 @@ public class LogicalTypeIdMapper extends DefaultJackson2JavaTypeMapper {
 
     public LogicalTypeIdMapper(PayloadTypeRegistry registry) {
         this.registry = registry;
-        registry.register("SimCmd", SimCmd.class);
         setTypePrecedence(TypePrecedence.TYPE_ID);
     }
 
