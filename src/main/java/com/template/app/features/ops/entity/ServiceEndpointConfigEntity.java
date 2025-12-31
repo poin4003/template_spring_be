@@ -21,9 +21,15 @@ public class ServiceEndpointConfigEntity extends BaseEntity {
     @TableId(value="service_endpoint_config_id", type=IdType.ASSIGN_UUID)
     private UUID serviceEndpointConfigId;
 
+    @TableField("endpoint_name")
+    private String endpointName;
+
     @TableField("endpoint_type")
     private EndpointTypeEnum endpointType;
 
     @TableField("endpoint_status")
     private EndpointStatusEnum endpointStatus; 
+
+    @TableField("config_version")
+    private Long configVersion;
 }

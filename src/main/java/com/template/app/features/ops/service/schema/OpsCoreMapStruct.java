@@ -20,7 +20,6 @@ public interface OpsCoreMapStruct {
     @Mapping(target = "consumerGroup", source = "detail.consumerGroup")
     @Mapping(target = "parallelism", source = "detail.parallelism")
     @Mapping(target = "handlerKey", source = "detail.handlerKey")
-    @Mapping(target = "handlerMethod", source = "detail.handlerMethod")
     @Mapping(target = "transportConfig", source = "detail.transportConfig") 
     MqConsumerRegistrationCmd toMqCmd(ServiceEndpointConfigEntity config, MqConsumerDetailEntity detail);
 

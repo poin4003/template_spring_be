@@ -2,7 +2,7 @@ package com.template.app.features.sims.consumer;
 
 import org.springframework.stereotype.Component;
 
-import com.template.app.core.messaging.MessageHandler;
+import com.template.app.core.messaging.handler.MessageHandler;
 import com.template.app.features.sims.service.SimService;
 import com.template.app.features.sims.service.schema.command.SimCmd;
 import com.template.app.features.sims.service.schema.result.SimResult;

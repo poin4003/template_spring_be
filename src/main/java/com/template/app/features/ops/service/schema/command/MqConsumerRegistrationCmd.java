@@ -20,8 +20,6 @@ public class MqConsumerRegistrationCmd {
 
     private String handlerKey;
 
-    private String handlerMethod;
-
     private Map<String, Object> transportConfig;
 
 }

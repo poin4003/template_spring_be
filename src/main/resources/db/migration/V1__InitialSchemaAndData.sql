@@ -195,7 +195,6 @@ CREATE TABLE mq_consumer_details (
     parallelism INT DEFAULT 1,
 
     handler_key VARCHAR(255) NOT NULL,
-    handler_method VARCHAR(255) NOT NULL,
 
     ack_strategy INT DEFAULT 0,
     retry_enabled BOOLEAN DEFAULT TRUE,
@@ -299,7 +298,6 @@ BEGIN
         consumer_group,
         parallelism,
         handler_key,
-        handler_method,
         ack_strategy,
         retry_enabled,
         transport_config,
@@ -313,7 +311,6 @@ BEGIN
         'sim-import-group-partner-a',
         3,
         'simImportConsumer',
-        'handle',
         0,
         true,
         '{"autoOffsetReset":"earliest"}',

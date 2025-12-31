@@ -1,4 +1,4 @@
-package com.template.app.core.messaging;
+package com.template.app.core.messaging.type;
 
 import java.nio.charset.StandardCharsets;
 

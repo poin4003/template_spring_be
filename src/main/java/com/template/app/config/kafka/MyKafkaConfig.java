@@ -12,45 +12,33 @@ import org.springframework.util.backoff.FixedBackOff;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import io.jsonwebtoken.io.DeserializationException;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Configuration 
-@Slf4j
+@Configuration
 public class MyKafkaConfig {
 
     @Bean
-    public DefaultErrorHandler commonErrorHandler() {
-        FixedBackOff fixedBackOff = new FixedBackOff(1000L, 3);
+    public DefaultErrorHandler staticConsumerErrorHandler() {
+        FixedBackOff backOff = new FixedBackOff(1000L, 3);
 
-        DefaultErrorHandler errorHandler = new DefaultErrorHandler((consumerRecord, exception) -> {
-            try {
-                if (consumerRecord == null) {
-                    log.error("Kafka error occurred (no consumer record): {}", exception.getMessage(), exception);
-                } else {
-                    String topic = consumerRecord.topic();
-                    long offset = consumerRecord.offset();
-                    log.error("Failed to process record. Topic={}, Offset={}, Error={}", topic, offset, exception.getMessage(), exception);
-                }
-            } catch (Exception e) {
-                log.error("Unexpected error while handling Kafka exception: {}", e.getMessage(), e);
-            }
-        }, fixedBackOff);
+        DefaultErrorHandler handler =
+            new DefaultErrorHandler(backOff);
 
-        errorHandler.addNotRetryableExceptions(
+        handler.addNotRetryableExceptions(
             SerializationException.class,
             DeserializationException.class,
-            IllegalStateException.class,
             InvalidFormatException.class
         );
- 
-        return errorHandler;
+
+        return handler;
     }
 
     @Bean
     public MessageHandlerMethodFactory kafkaHandlerMethodFactory() {
-        DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
+        DefaultMessageHandlerMethodFactory factory =
+            new DefaultMessageHandlerMethodFactory();
 
-        factory.setMessageConverter(new MappingJackson2MessageConverter());
+        factory.setMessageConverter(
+            new MappingJackson2MessageConverter()
+        );
         return factory;
     }
 }

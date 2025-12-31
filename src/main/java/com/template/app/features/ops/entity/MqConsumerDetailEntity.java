@@ -52,10 +52,47 @@ public class MqConsumerDetailEntity extends BaseEntity {
     private String handlerKey;
 
     /**
-     * Method name
+     * Retry mode
+     * ENABLE / DISABLE retry
      */
-    @TableField("handler_method")
-    private String handlerMethod;
+    @TableField("retry_enabled")
+    private Boolean retryEnabled;
+
+    /**
+     * Max retry
+     */
+    @TableField("max_retry_attempts")
+    private Integer maxRetryAttemps;
+
+    /**
+     * Initial interval ms
+     */
+    @TableField("retry_initial_interval_ms")
+    private Long retryInitialIntervalMs;
+
+    /**
+     * Multiplier retry
+     */
+    @TableField("retry_multiplier")
+    private Double retryMultiplier;
+
+    /**
+     * Max retry interval ms
+     */
+    @TableField("retry_max_interval_ms")
+    private Long retryMaxIntervalMs;
+
+    /**
+     * DLQ Policy
+     */
+    @TableField("dlq_enabled")
+    private Boolean dlqEnabled;
+
+    /**
+     * DLQ source name (Rule: generate by source name)
+     */
+    @TableField("dlq_source_name")
+    private String dlqSourceName;
 
     /**
      * Mq ack stategy
@@ -63,13 +100,6 @@ public class MqConsumerDetailEntity extends BaseEntity {
      */
     @TableField("ack_strategy")
     private MqAckStrategyEnum ackStrategy;
-
-    /**
-     * Retry mode
-     * ENABLE / DISABLE retry
-     */
-    @TableField("retry_enabled")
-    private Boolean retryEnabled;
 
     /**
      * Mq config

@@ -18,10 +18,10 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.stereotype.Service;
 
-import com.template.app.core.messaging.LogicalTypeIdMapper;
-import com.template.app.core.messaging.MessageHandler;
-import com.template.app.core.messaging.MessageHandlerRegistry;
-import com.template.app.core.messaging.PayloadTypeRegistry;
+import com.template.app.core.messaging.handler.MessageHandler;
+import com.template.app.core.messaging.handler.MessageHandlerRegistry;
+import com.template.app.core.messaging.type.LogicalTypeIdMapper;
+import com.template.app.core.messaging.type.PayloadTypeRegistry;
 import com.template.app.features.ops.service.DynamicMqListenerService;
 import com.template.app.features.ops.service.schema.command.MqConsumerRegistrationCmd;
 

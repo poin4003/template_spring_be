@@ -10,7 +10,7 @@ import org.springframework.lang.NonNull;
 
 import com.template.app.core.annotation.RegisterMqType;
 import com.template.app.core.constant.AppConstants;
-import com.template.app.core.messaging.PayloadTypeRegistry;
+import com.template.app.core.messaging.type.PayloadTypeRegistry;
 
 @Component
 public class MqTypeRegistrar implements BeanFactoryPostProcessor {
