@@ -3,6 +3,7 @@
 ----------------------------------------------------
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+DROP TABLE IF EXISTS system_error_definations CASCADE;
 DROP TABLE IF EXISTS mq_consumer_details CASCADE;
 DROP TABLE IF EXISTS service_endpoint_configs CASCADE;
 DROP TABLE IF EXISTS sims CASCADE;
@@ -14,6 +15,22 @@ DROP TABLE IF EXISTS user_info CASCADE;
 DROP TABLE IF EXISTS user_base CASCADE;
 DROP TABLE IF EXISTS roles CASCADE;
 DROP TABLE IF EXISTS permissions CASCADE;
+
+----------------------------------------------------
+-- ERROR DEFINATION TABLES (Inherit BaseEntity)
+----------------------------------------------------
+CREATE TABLE system_error_definations (
+    error_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    error_code INT NOT NULL UNIQUE,
+    alias_key VARCHAR(100) NOT NULL,
+    http_status INT NOT NULL,
+    category INT NOT NULL,
+
+    note TEXT,
+    description TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
 
 ----------------------------------------------------
 -- 2. RBAC TABLES (Inherit BaseEntity)

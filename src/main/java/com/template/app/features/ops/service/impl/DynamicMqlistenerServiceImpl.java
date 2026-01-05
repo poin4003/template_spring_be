@@ -36,7 +36,6 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
     private final KafkaListenerEndpointRegistry kafkaRegistry;
     private final MessageHandlerRegistry handlerRegistry;
     private final KafkaProperties kafkaProperties;
-    private final DefaultErrorHandler errorHandler;
     private final MessageHandlerMethodFactory handlerMethodFactory;
     private final PayloadTypeRegistry payloadTypeRegistry;
 
@@ -133,7 +132,6 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
             new ConcurrentKafkaListenerContainerFactory<>();
 
         factory.setConsumerFactory(consumerFactory);
-        factory.setCommonErrorHandler(errorHandler);
 
         return factory;
     }

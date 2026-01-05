@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.template.app.features.ops.enums.EndpointStatusEnum;
 import com.template.app.features.ops.enums.EndpointTypeEnum;
+import com.template.app.features.ops.enums.ErrorCategoryEnum;
 import com.template.app.features.ops.enums.MqAckStrategyEnum;
 import com.template.app.features.sims.enums.SimStatusEnum;
 import com.template.app.features.user.enums.UserStatusEnum;
@@ -39,6 +40,7 @@ public class MyBatisPlusConfig {
             configuration.getTypeHandlerRegistry().register(EndpointTypeEnum.class, new GenericEnumTypeHandler<>(EndpointTypeEnum.class));
             configuration.getTypeHandlerRegistry().register(EndpointStatusEnum.class, new GenericEnumTypeHandler<>(EndpointStatusEnum.class));
             configuration.getTypeHandlerRegistry().register(MqAckStrategyEnum.class, new GenericEnumTypeHandler<>(MqAckStrategyEnum.class));
+            configuration.getTypeHandlerRegistry().register(ErrorCategoryEnum.class, new GenericEnumTypeHandler<>(ErrorCategoryEnum.class));
         };
     }
 }
