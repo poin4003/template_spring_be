@@ -2,8 +2,8 @@ package com.template.app.features.ops.service.impl;
 
 import java.util.List;
 
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
+// import org.springframework.boot.context.event.ApplicationReadyEvent;
+// import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.template.app.features.ops.entity.MqConsumerDetailEntity;
@@ -29,8 +29,8 @@ public class OpsEndpointServiceImpl implements OpsEndpointService {
     private final OpsCoreMapStruct opsCoreMapStruct;
     private final DynamicMqListenerService dynamicMqListenerService;
 
+    // @EventListener(ApplicationReadyEvent.class)
     @Override
-    @EventListener(ApplicationReadyEvent.class)
     public void initializeActiveEndpoints() {
         log.info("=== [OPS-MANAGER] Starting scan and init endpoints ===");
 

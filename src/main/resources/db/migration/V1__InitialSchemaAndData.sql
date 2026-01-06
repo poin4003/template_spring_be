@@ -4,6 +4,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 DROP TABLE IF EXISTS system_error_definations CASCADE;
+DROP TABLE IF EXISTS system_error_messages CASCADE;
 DROP TABLE IF EXISTS mq_consumer_details CASCADE;
 DROP TABLE IF EXISTS service_endpoint_configs CASCADE;
 DROP TABLE IF EXISTS sims CASCADE;
@@ -30,6 +31,25 @@ CREATE TABLE system_error_definations (
     description TEXT,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE system_error_messages (
+    message_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    error_defination_id UUID NOT NULL,
+    language_code VARCHAR(10) NOT NULL DEFAULT 'en',
+    message_content TEXT NOT NULL,
+
+    note TEXT,
+    description TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_message_defination
+        FOREIGN KEY (error_defination_id)
+        REFERENCES system_error_definations(error_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT uq_defination_language UNIQUE (error_defination_id, language_code)
 );
 
 ----------------------------------------------------
