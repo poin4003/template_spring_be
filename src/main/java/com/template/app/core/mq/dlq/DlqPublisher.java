@@ -1,4 +1,4 @@
-package com.template.app.core.messaging.dlq;
+package com.template.app.core.mq.dlq;
 
 import org.apache.kafka.common.header.Headers;
 import org.springframework.lang.NonNull;

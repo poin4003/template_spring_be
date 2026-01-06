@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.util.backoff.FixedBackOff;
 
-import com.template.app.core.messaging.dlq.DlqMetadata;
-import com.template.app.core.messaging.dlq.DlqPublisher;
+import com.template.app.core.mq.dlq.DlqMetadata;
+import com.template.app.core.mq.dlq.DlqPublisher;
 
 @Configuration
 public class KafkaErrorHandlerConfig {

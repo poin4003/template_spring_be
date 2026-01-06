@@ -1,4 +1,4 @@
-package com.template.app.core.messaging.dlq;
+package com.template.app.core.mq.dlq;
 
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;

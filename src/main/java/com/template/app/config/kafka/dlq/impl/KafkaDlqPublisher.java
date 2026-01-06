@@ -11,8 +11,8 @@ import org.springframework.lang.NonNull;
 
 import com.template.app.config.kafka.KafkaHeaderMapper;
 import com.template.app.config.kafka.dlq.DlqTopicResolver;
-import com.template.app.core.messaging.dlq.DlqMetadata;
-import com.template.app.core.messaging.dlq.DlqPublisher;
+import com.template.app.core.mq.dlq.DlqMetadata;
+import com.template.app.core.mq.dlq.DlqPublisher;
 
 import lombok.RequiredArgsConstructor;
 

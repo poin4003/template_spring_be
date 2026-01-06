@@ -1,4 +1,4 @@
-package com.template.app.core.messaging.handler;
+package com.template.app.core.mq.handler;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package com.template.app.core.messaging.consumer;
+package com.template.app.core.mq.consumer;
 
 import org.springframework.lang.NonNull;
 

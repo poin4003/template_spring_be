@@ -12,8 +12,8 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import com.template.app.core.annotation.RegisterMqConsumer;
 import com.template.app.core.constant.AppConstants;
-import com.template.app.core.messaging.consumer.MqConsumerMeta;
-import com.template.app.core.messaging.consumer.MqConsumerRegistry;
+import com.template.app.core.mq.consumer.MqConsumerMeta;
+import com.template.app.core.mq.consumer.MqConsumerRegistry;
 
 @Component
 public class MqConsumerRegistrar implements BeanFactoryPostProcessor {

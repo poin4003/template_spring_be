@@ -1,4 +1,4 @@
-package com.template.app.core.messaging.type;
+package com.template.app.core.mq.type;
 
 import java.nio.charset.StandardCharsets;
 
