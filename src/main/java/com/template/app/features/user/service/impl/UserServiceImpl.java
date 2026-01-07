@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
         LambdaQueryWrapper<UserBaseEntity> checkEmail = new LambdaQueryWrapper<>();
         checkEmail.eq(UserBaseEntity::getUserEmail, email);
         if (userBaseRepository.exists(checkEmail)) {
-            throw ExceptionFactory.dataAlreadyExists("Email " + email + "already exists.");
+            throw ExceptionFactory.dataAlreadyExists("Email " + email);
         }
     }
 

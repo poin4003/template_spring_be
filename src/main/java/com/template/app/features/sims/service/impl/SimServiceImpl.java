@@ -47,7 +47,7 @@ public class SimServiceImpl implements SimService{
         );
 
         if (exist != null) { 
-            throw ExceptionFactory.dataAlreadyExists("PhoneNumber " + cmd.getSimPhoneNumber() + " already exists.");
+            throw ExceptionFactory.dataAlreadyExists("PhoneNumber " + cmd.getSimPhoneNumber());
         }
 
         SimEntity simEntity = simCoreMapStruct.commandToEntity(cmd);
@@ -83,7 +83,7 @@ public class SimServiceImpl implements SimService{
 
         if (simEntity == null) { 
             log.error("Service:-> getSimById | {}", id);
-            throw ExceptionFactory.dataNotFound("Sim ID " + id + " not exists.");
+            throw ExceptionFactory.dataNotFound("Sim ID " + id);
         }
 
         return simCoreMapStruct.toResult(simEntity);

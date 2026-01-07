@@ -12,16 +12,15 @@ import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.config.MethodKafkaListenerEndpoint;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.stereotype.Service;
 
-import com.template.app.core.messaging.LogicalTypeIdMapper;
-import com.template.app.core.messaging.MessageHandler;
-import com.template.app.core.messaging.MessageHandlerRegistry;
-import com.template.app.core.messaging.PayloadTypeRegistry;
+import com.template.app.core.mq.handler.MessageHandler;
+import com.template.app.core.mq.handler.MessageHandlerRegistry;
+import com.template.app.core.mq.type.LogicalTypeIdMapper;
+import com.template.app.core.mq.type.PayloadTypeRegistry;
 import com.template.app.features.ops.service.DynamicMqListenerService;
 import com.template.app.features.ops.service.schema.command.MqConsumerRegistrationCmd;
 
@@ -36,7 +35,6 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
     private final KafkaListenerEndpointRegistry kafkaRegistry;
     private final MessageHandlerRegistry handlerRegistry;
     private final KafkaProperties kafkaProperties;
-    private final DefaultErrorHandler errorHandler;
     private final MessageHandlerMethodFactory handlerMethodFactory;
     private final PayloadTypeRegistry payloadTypeRegistry;
 
@@ -133,7 +131,6 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
             new ConcurrentKafkaListenerContainerFactory<>();
 
         factory.setConsumerFactory(consumerFactory);
-        factory.setCommonErrorHandler(errorHandler);
 
         return factory;
     }

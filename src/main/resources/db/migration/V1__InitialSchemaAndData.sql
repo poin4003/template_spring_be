@@ -3,6 +3,8 @@
 ----------------------------------------------------
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+DROP TABLE IF EXISTS system_error_definations CASCADE;
+DROP TABLE IF EXISTS system_error_messages CASCADE;
 DROP TABLE IF EXISTS mq_consumer_details CASCADE;
 DROP TABLE IF EXISTS service_endpoint_configs CASCADE;
 DROP TABLE IF EXISTS sims CASCADE;
@@ -14,6 +16,41 @@ DROP TABLE IF EXISTS user_info CASCADE;
 DROP TABLE IF EXISTS user_base CASCADE;
 DROP TABLE IF EXISTS roles CASCADE;
 DROP TABLE IF EXISTS permissions CASCADE;
+
+----------------------------------------------------
+-- ERROR DEFINATION TABLES (Inherit BaseEntity)
+----------------------------------------------------
+CREATE TABLE system_error_definations (
+    error_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    error_code INT NOT NULL UNIQUE,
+    alias_key VARCHAR(100) NOT NULL,
+    http_status INT NOT NULL,
+    category INT NOT NULL,
+
+    note TEXT,
+    description TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE system_error_messages (
+    message_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    error_defination_id UUID NOT NULL,
+    language_code VARCHAR(10) NOT NULL DEFAULT 'en',
+    message_content TEXT NOT NULL,
+
+    note TEXT,
+    description TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_message_defination
+        FOREIGN KEY (error_defination_id)
+        REFERENCES system_error_definations(error_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT uq_defination_language UNIQUE (error_defination_id, language_code)
+);
 
 ----------------------------------------------------
 -- 2. RBAC TABLES (Inherit BaseEntity)
@@ -195,7 +232,6 @@ CREATE TABLE mq_consumer_details (
     parallelism INT DEFAULT 1,
 
     handler_key VARCHAR(255) NOT NULL,
-    handler_method VARCHAR(255) NOT NULL,
 
     ack_strategy INT DEFAULT 0,
     retry_enabled BOOLEAN DEFAULT TRUE,
@@ -299,7 +335,6 @@ BEGIN
         consumer_group,
         parallelism,
         handler_key,
-        handler_method,
         ack_strategy,
         retry_enabled,
         transport_config,
@@ -313,7 +348,6 @@ BEGIN
         'sim-import-group-partner-a',
         3,
         'simImportConsumer',
-        'handle',
         0,
         true,
         '{"autoOffsetReset":"earliest"}',

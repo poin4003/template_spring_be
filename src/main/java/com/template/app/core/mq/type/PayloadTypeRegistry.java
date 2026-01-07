@@ -1,4 +1,4 @@
-package com.template.app.core.messaging;
+package com.template.app.core.mq.type;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

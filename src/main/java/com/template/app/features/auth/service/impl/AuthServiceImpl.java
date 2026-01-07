@@ -79,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         UUID userId = jwtTokenProvider.getUserIdFromTokenUnverified(refreshToken);
-        if (userId == null) throw ExceptionFactory.dataNotFound("userId " + userId + " not found");
+        if (userId == null) throw ExceptionFactory.dataNotFound("userId " + userId);
 
         KeyStoreEntity keyStore = keyStoreRepository.selectOne(
             new LambdaQueryWrapper<KeyStoreEntity>().eq(KeyStoreEntity::getUserId, userId)
