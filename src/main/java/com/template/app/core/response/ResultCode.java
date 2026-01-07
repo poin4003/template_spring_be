@@ -2,7 +2,7 @@ package com.template.app.core.response;
 
 import org.springframework.http.HttpStatus;
 
-import com.template.app.features.ops.enums.ErrorCategoryEnum;
+import com.template.app.features.error.enums.ErrorCategoryEnum;
 
 public enum ResultCode {
 

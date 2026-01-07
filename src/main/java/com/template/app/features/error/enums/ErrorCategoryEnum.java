@@ -1,4 +1,4 @@
-package com.template.app.features.ops.enums;
+package com.template.app.features.error.enums;
 
 import com.template.app.base.BaseEnum;
 import com.template.app.utils.EnumUtils;

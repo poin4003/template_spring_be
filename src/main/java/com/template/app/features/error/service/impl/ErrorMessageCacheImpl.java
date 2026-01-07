@@ -1,4 +1,4 @@
-package com.template.app.features.ops.service.impl;
+package com.template.app.features.error.service.impl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.template.app.core.constant.AppConstants;
 import com.template.app.core.sync.SyncableDataService;
-import com.template.app.features.ops.entity.SystemErrorDefinationEntity;
-import com.template.app.features.ops.entity.SystemErrorMessageEntity;
-import com.template.app.features.ops.repository.SystemErrorDefinationRepository;
-import com.template.app.features.ops.repository.SystemErrorMessageRepository;
+import com.template.app.features.error.entity.SystemErrorDefinationEntity;
+import com.template.app.features.error.entity.SystemErrorMessageEntity;
+import com.template.app.features.error.repository.SystemErrorDefinationRepository;
+import com.template.app.features.error.repository.SystemErrorMessageRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

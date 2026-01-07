@@ -1,4 +1,4 @@
-package com.template.app.features.ops.entity;
+package com.template.app.features.error.entity;
 
 import java.util.UUID;
 
@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.template.app.base.BaseEntity;
-import com.template.app.features.ops.enums.ErrorCategoryEnum;
+import com.template.app.features.error.enums.ErrorCategoryEnum;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

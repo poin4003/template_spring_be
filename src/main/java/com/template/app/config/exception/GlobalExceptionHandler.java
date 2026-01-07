@@ -4,7 +4,7 @@ import com.template.app.core.exception.MyException;
 import com.template.app.core.response.ResultCode;
 import com.template.app.core.response.ResultUtil;
 import com.template.app.core.vo.ResultMessage;
-import com.template.app.features.ops.service.impl.ErrorMessageCacheImpl;
+import com.template.app.features.error.service.impl.ErrorMessageCacheImpl;
 import com.template.app.utils.JsonUtils;
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;

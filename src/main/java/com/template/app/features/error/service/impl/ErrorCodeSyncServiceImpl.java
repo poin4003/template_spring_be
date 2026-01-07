@@ -1,4 +1,4 @@
-package com.template.app.features.ops.service.impl;
+package com.template.app.features.error.service.impl;
 
 import java.util.UUID;
 
@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.template.app.core.response.ResultCode;
 import com.template.app.core.sync.SyncableDataService;
-import com.template.app.features.ops.entity.SystemErrorDefinationEntity;
-import com.template.app.features.ops.repository.SystemErrorDefinationRepository;
+import com.template.app.features.error.entity.SystemErrorDefinationEntity;
+import com.template.app.features.error.repository.SystemErrorDefinationRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

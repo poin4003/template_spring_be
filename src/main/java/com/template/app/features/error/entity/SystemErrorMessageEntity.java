@@ -1,4 +1,4 @@
-package com.template.app.features.ops.entity;
+package com.template.app.features.error.entity;
 
 import java.util.UUID;
 
