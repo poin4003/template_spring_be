@@ -53,6 +53,33 @@ CREATE TABLE system_error_messages (
 );
 
 ----------------------------------------------------
+-- ACTION RULE TABLES (Inherit BaseEntity)
+----------------------------------------------------
+CREATE TABLE action_rules (
+    rule_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    rule_name VARCHAR(255),
+    action_type INT,
+    action_config JSONB,
+    priority INT,
+    status INT,
+    target_type INT,
+    target_id UUID
+);
+
+CREATE TABLE action_rule_mappings (
+    rule_id UUID NOT NULL,
+
+    error_id UUID NOT NULL,
+
+    PRIMARY KEY (rule_id, error_id),
+
+    CONSTRAINT fk_arm_rule FOREIGN KEY (rule_id) REFERENCES action_rules(rule_id) ON DELETE CASCADE,
+    CONSTRAINT fk_arm_error FOREIGN KEY (error_id) REFERENCES system_error_definations(error_id) ON DELETE CASCADE
+)
+
+CREATE INDEX idx_arm_error ON action_rule_mappings(error_id);
+
+----------------------------------------------------
 -- 2. RBAC TABLES (Inherit BaseEntity)
 ----------------------------------------------------
 
@@ -234,7 +261,6 @@ CREATE TABLE mq_consumer_details (
     handler_key VARCHAR(255) NOT NULL,
 
     ack_strategy INT DEFAULT 0,
-    retry_enabled BOOLEAN DEFAULT TRUE,
 
     transport_config JSONB,
 
@@ -336,7 +362,6 @@ BEGIN
         parallelism,
         handler_key,
         ack_strategy,
-        retry_enabled,
         transport_config,
         note,
         description
@@ -349,7 +374,6 @@ BEGIN
         3,
         'simImportConsumer',
         0,
-        true,
         '{"autoOffsetReset":"earliest"}',
         'Main SIM import',
         'Consumer handle import single sim'
