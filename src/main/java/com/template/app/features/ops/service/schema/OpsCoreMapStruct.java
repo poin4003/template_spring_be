@@ -16,11 +16,6 @@ import com.template.app.features.ops.service.schema.command.MqConsumerRegistrati
 public interface OpsCoreMapStruct {
     
     @Mapping(target = "endpointId", source = "config.serviceEndpointConfigId")
-    @Mapping(target = "sourceName", source = "detail.sourceName")
-    @Mapping(target = "consumerGroup", source = "detail.consumerGroup")
-    @Mapping(target = "parallelism", source = "detail.parallelism")
-    @Mapping(target = "handlerKey", source = "detail.handlerKey")
-    @Mapping(target = "transportConfig", source = "detail.transportConfig") 
     MqConsumerRegistrationCmd toMqCmd(ServiceEndpointConfigEntity config, MqConsumerDetailEntity detail);
 
 }

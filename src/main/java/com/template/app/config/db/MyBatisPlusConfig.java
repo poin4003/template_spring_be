@@ -10,7 +10,6 @@ import com.template.app.features.actionRule.enums.RuleTargetTypeEnum;
 import com.template.app.features.error.enums.ErrorCategoryEnum;
 import com.template.app.features.ops.enums.EndpointStatusEnum;
 import com.template.app.features.ops.enums.EndpointTypeEnum;
-import com.template.app.features.ops.enums.MqAckStrategyEnum;
 import com.template.app.features.sims.enums.SimStatusEnum;
 import com.template.app.features.user.enums.UserStatusEnum;
 import com.template.app.handler.GenericEnumTypeHandler;
@@ -42,7 +41,6 @@ public class MyBatisPlusConfig {
             configuration.getTypeHandlerRegistry().register(UserStatusEnum.class, new GenericEnumTypeHandler<>(UserStatusEnum.class));
             configuration.getTypeHandlerRegistry().register(EndpointTypeEnum.class, new GenericEnumTypeHandler<>(EndpointTypeEnum.class));
             configuration.getTypeHandlerRegistry().register(EndpointStatusEnum.class, new GenericEnumTypeHandler<>(EndpointStatusEnum.class));
-            configuration.getTypeHandlerRegistry().register(MqAckStrategyEnum.class, new GenericEnumTypeHandler<>(MqAckStrategyEnum.class));
             configuration.getTypeHandlerRegistry().register(ErrorCategoryEnum.class, new GenericEnumTypeHandler<>(ErrorCategoryEnum.class));
             configuration.getTypeHandlerRegistry().register(ActionRuleStatusEnum.class, new GenericEnumTypeHandler<>(ActionRuleStatusEnum.class));
             configuration.getTypeHandlerRegistry().register(RuleActionTypeEnum.class, new GenericEnumTypeHandler<>(RuleActionTypeEnum.class));

@@ -9,7 +9,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.template.app.base.BaseEntity;
-import com.template.app.features.ops.enums.MqAckStrategyEnum;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -52,16 +51,43 @@ public class MqConsumerDetailEntity extends BaseEntity {
     private String handlerKey;
 
     /**
-     * Mq ack stategy
-     * AUTO / MANUAL
-     */
-    @TableField("ack_strategy")
-    private MqAckStrategyEnum ackStrategy;
-
-    /**
      * Mq config
      * Transport-specific override config (optional)
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
     private Map<String, Object> transportConfig;
+
+    /**
+     * Max retry attemps
+     * Number of retries when an error occurs
+     */
+    @TableField("max_retry_attempts")
+    private Integer maxRetryAttempts;
+
+    /**
+     * Retry backoff ms
+     * Retry time when an error occurs
+     */
+    @TableField("retry_backoff_ms")
+    private Long retryBackoffMs;
+
+    /**
+     * Multiplier retry
+     * Multiples of the time each retry
+     */
+    @TableField("retry_multiplier")
+    private Double retryMultiplier;
+
+    /**
+     * Enabled dlq
+     * Active dlq
+     */
+    @TableField("enable_dlq")
+    private Boolean enableDlq;
+
+    /**
+     * Dead letter queue name
+     */
+    @TableField("dlq_name")
+    private String dlqName;
 }

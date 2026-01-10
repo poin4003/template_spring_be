@@ -3,19 +3,35 @@
 <mapper namespace="com.template.app.features.actionRule.repository.ActionRuleRepository">
 
     <resultMap id="BaseResultMap" type="com.template.app.features.actionRule.entity.ActionRuleEntity">
-        <id column="id" property="id" />
+        <id column="rule_id" property="ruleId" />
         
-        <result column="target_id" property="targetId" />
-        <result column="error_code" property="errorCode" />
+        <result column="rule_name" property="ruleName" />
+        <result column="target_type" property="targetType" />
+        <result column="target_id" property="targetId" /> 
+        <result column="action_type" property="actionType" />
         
+        <result column="action_config" property="actionConfig" 
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+
+        <result column="priority" property="priority"></result>
+        <result column="status" property="status"></result>
+
+        <result column="note" property="note"></result>
+        <result column="description" property="description"></result>
         <result column="created_at" property="createdAt" />
         <result column="updated_at" property="updatedAt" />
     </resultMap>
 
     <select id="findMatchedRuleByCode" resultMap="BaseResultMap">
-        SELECT * FROM action_rule
-        WHERE target_id = #{targetId}
-          AND error_code = #{errorCode}
+        SELECT DISTINCT r.*
+        FROM action_rules r
+        INNER JOIN action_rule_mappings m ON r.rule_id = m.rule_id
+        INNER JOIN system_error_definations e ON m.error_id = e.error_id 
+        WHERE r.status = 1 
+            AND (r.target_id = #{targetId} OR r.target_type = 'GLOBAL')  
+            AND e.error_code = #{errorCode}
+            AND e.category = #{category} 
+        ORDER BY r.priority DESC, r.target_type DESC
         LIMIT 1
     </select>
 

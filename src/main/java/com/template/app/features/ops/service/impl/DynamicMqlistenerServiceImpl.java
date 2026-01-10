@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -12,10 +13,15 @@ import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.config.MethodKafkaListenerEndpoint;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.listener.ConsumerRecordRecoverer;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.backoff.FixedBackOff;
 
 import com.template.app.core.mq.handler.MessageHandler;
 import com.template.app.core.mq.handler.MessageHandlerRegistry;
@@ -24,6 +30,7 @@ import com.template.app.core.mq.type.PayloadTypeRegistry;
 import com.template.app.features.ops.service.DynamicMqListenerService;
 import com.template.app.features.ops.service.schema.command.MqConsumerRegistrationCmd;
 
+import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,6 +44,7 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
     private final KafkaProperties kafkaProperties;
     private final MessageHandlerMethodFactory handlerMethodFactory;
     private final PayloadTypeRegistry payloadTypeRegistry;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public void registerMqConsumer(MqConsumerRegistrationCmd cmd) {
@@ -69,7 +77,9 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
         endpoint.setMethod(
             Objects.requireNonNull(handlerMethod, "handlerMethod must not be null")
         );
-        endpoint.setMessageHandlerMethodFactory(handlerMethodFactory);
+        endpoint.setMessageHandlerMethodFactory(
+            Objects.requireNonNull(handlerMethodFactory, "handlerMethodfactory must be not null")
+        );
 
         ConcurrentKafkaListenerContainerFactory<String, Object> factory =
             Objects.requireNonNull(
@@ -101,18 +111,30 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
         );
     }
 
+    @Nonnull
     private ConcurrentKafkaListenerContainerFactory<String, Object>
     buildContainerFactory(MqConsumerRegistrationCmd cmd) {
 
-        Map<String, Object> props =
-            new HashMap<>(kafkaProperties.buildConsumerProperties());
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
+            new ConcurrentKafkaListenerContainerFactory<>();
 
-        LogicalTypeIdMapper typeMapper =
-            new LogicalTypeIdMapper(payloadTypeRegistry);
+        factory.setConsumerFactory(
+            Objects.requireNonNull(createConsumerFactory(), "ConsumerFactory must not be null")
+        );
 
-        JsonDeserializer<Object> jsonDeserializer =
-            new JsonDeserializer<>();
+        factory.setCommonErrorHandler(
+            Objects.requireNonNull(createErrorHandler(cmd), "ErrorHandler must not be null")
+        );
 
+        return factory;
+    }
+
+    private ConsumerFactory<String, Object> createConsumerFactory() {
+        Map<String, Object> props = new HashMap<>(kafkaProperties.buildConsumerProperties());
+
+        LogicalTypeIdMapper typeMapper = new LogicalTypeIdMapper(payloadTypeRegistry);
+
+        JsonDeserializer<Object> jsonDeserializer = new JsonDeserializer<>();
         jsonDeserializer.addTrustedPackages("*");
         jsonDeserializer.setUseTypeHeaders(true);
         jsonDeserializer.setTypeMapper(typeMapper);
@@ -120,18 +142,47 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
         ErrorHandlingDeserializer<Object> valueDeserializer =
             new ErrorHandlingDeserializer<>(jsonDeserializer);
 
-        ConsumerFactory<String, Object> consumerFactory =
-            new DefaultKafkaConsumerFactory<>(
-                props,
-                new StringDeserializer(),
-                valueDeserializer
+        return new DefaultKafkaConsumerFactory<>(
+            props,
+            new StringDeserializer(),
+            valueDeserializer
+        );
+    }
+
+    private DefaultErrorHandler createErrorHandler(MqConsumerRegistrationCmd cmd) {
+        long backoffInterval = (cmd.getRetryBackoffMs() != null) ? cmd.getRetryBackoffMs() : 1000L;
+        int maxAttempts = (cmd.getMaxRetryAttempts() != null) ? cmd.getMaxRetryAttempts() : 0;
+
+        FixedBackOff backOff = new FixedBackOff(backoffInterval, maxAttempts);
+
+        ConsumerRecordRecoverer recoverer = createRecoverer(cmd);
+
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, backOff);
+
+        errorHandler.addNotRetryableExceptions(IllegalArgumentException.class);
+
+        return errorHandler;
+    }
+
+    private ConsumerRecordRecoverer createRecoverer(MqConsumerRegistrationCmd cmd) {
+        boolean dlqEnabled = Boolean.TRUE.equals(cmd.getEnableDlq());
+
+        if (!dlqEnabled) {
+            return (record, ex) -> log.error(
+                "[Recoverer] Consumer [{}] exhauted retries. Message discarded. Error: {}",
+                cmd.getEndpointId(), ex.getMessage()
             );
+        }
 
-        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
-            new ConcurrentKafkaListenerContainerFactory<>();
+        String dlqName = (cmd.getDlqName() != null && !cmd.getDlqName().isEmpty())
+            ? cmd.getDlqName()
+            : cmd.getSourceName() + ".DLQ";
 
-        factory.setConsumerFactory(consumerFactory);
+        log.info("Consumer [{}] DLQ enabled -> Target: {}", cmd.getEndpointId());
 
-        return factory;
+        return new DeadLetterPublishingRecoverer(
+            Objects.requireNonNull(kafkaTemplate, "kafkaTemplate must not be null"),
+            (record, ex) -> new TopicPartition(dlqName, -1)
+        );
     }
 }

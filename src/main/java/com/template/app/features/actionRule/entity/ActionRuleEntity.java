@@ -12,7 +12,6 @@ import com.template.app.features.actionRule.enums.ActionRuleStatusEnum;
 import com.template.app.features.actionRule.enums.RuleActionTypeEnum;
 import com.template.app.features.actionRule.enums.RuleTargetTypeEnum;
 import com.template.app.features.actionRule.vo.ActionConfig;
-import com.template.app.features.error.enums.ErrorCategoryEnum;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -33,12 +32,6 @@ public class ActionRuleEntity extends BaseEntity {
 
     @TableField("target_id")
     private UUID targetId;
-
-    @TableField("match_category")
-    private ErrorCategoryEnum matchCategory;
-
-    @TableField("match_error_code")
-    private Integer matchErrorCode;
 
     @TableField("action_type")
     private RuleActionTypeEnum actionType;

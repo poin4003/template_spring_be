@@ -5,10 +5,7 @@ import java.util.UUID;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.template.app.features.actionRule.entity.ActionRuleEntity;
-import com.template.app.features.actionRule.enums.ActionRuleStatusEnum;
-import com.template.app.features.actionRule.enums.RuleTargetTypeEnum;
 import com.template.app.features.actionRule.repository.ActionRuleRepository;
 import com.template.app.features.actionRule.service.ActionRuleService;
 import com.template.app.features.actionRule.service.schema.result.MatchedRuleResult;
@@ -33,28 +30,7 @@ public class ActionRuleServiceImpl implements ActionRuleService {
     public MatchedRuleResult findBestMatch(UUID targetId, Integer errorCode, ErrorCategoryEnum category) {
         log.debug("Matching rule for Target: {}, Code: {}, Cat: {}", targetId, errorCode, category);
 
-        ActionRuleEntity rule = actionRuleRepo.selectOne(new LambdaQueryWrapper<ActionRuleEntity>()
-            .select(ActionRuleEntity::getRuleName, ActionRuleEntity::getActionType,
-                ActionRuleEntity::getActionConfig, ActionRuleEntity::getPriority
-            )
-            .eq(ActionRuleEntity::getStatus, ActionRuleStatusEnum.ACTIVE)
-            .and(w -> w.eq(ActionRuleEntity::getTargetId, targetId)
-                .or()
-                .eq(ActionRuleEntity::getTargetType, RuleTargetTypeEnum.GLOBAL)
-            )
-            .and(w -> w
-                .eq(ActionRuleEntity::getMatchCategory, errorCode)
-                .or()
-                .eq(ActionRuleEntity::getMatchCategory, category)
-                .or(sub -> sub
-                    .isNull(ActionRuleEntity::getMatchErrorCode)
-                    .isNull(ActionRuleEntity::getMatchCategory)
-                )
-            )
-            .orderByDesc(ActionRuleEntity::getPriority)
-            .orderByDesc(ActionRuleEntity::getTargetType)
-            .last("LIMIT 1")
-        );
+        ActionRuleEntity rule = actionRuleRepo.findMatchedRule(targetId, errorCode, category);
 
         if (rule == null) {
             return null;

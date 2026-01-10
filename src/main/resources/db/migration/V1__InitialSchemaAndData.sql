@@ -75,7 +75,7 @@ CREATE TABLE action_rule_mappings (
 
     CONSTRAINT fk_arm_rule FOREIGN KEY (rule_id) REFERENCES action_rules(rule_id) ON DELETE CASCADE,
     CONSTRAINT fk_arm_error FOREIGN KEY (error_id) REFERENCES system_error_definations(error_id) ON DELETE CASCADE
-)
+);
 
 CREATE INDEX idx_arm_error ON action_rule_mappings(error_id);
 
@@ -255,14 +255,16 @@ CREATE TABLE mq_consumer_details (
 
     source_name VARCHAR(255) NOT NULL,
     consumer_group VARCHAR(255) NOT NULL,
-
     parallelism INT DEFAULT 1,
-
     handler_key VARCHAR(255) NOT NULL,
-
-    ack_strategy INT DEFAULT 0,
-
     transport_config JSONB,
+
+    max_retry_attempts INT DEFAULT 0,
+    retry_backoff_ms BIGINT DEFAULT 1000,
+    retry_multiplier DOUBLE PRECISION DEFAULT 1.0,
+
+    enable_dlq BOOLEAN DEFAULT FALSE,
+    dlq_name VARCHAR(255),
 
     note VARCHAR(255),
     description TEXT,
@@ -361,8 +363,14 @@ BEGIN
         consumer_group,
         parallelism,
         handler_key,
-        ack_strategy,
         transport_config,
+
+        max_retry_attempts,
+        retry_backoff_ms,
+        retry_multiplier,
+        enable_dlq,
+        dlq_name,
+
         note,
         description
     )
@@ -373,8 +381,12 @@ BEGIN
         'sim-import-group-partner-a',
         3,
         'simImportConsumer',
-        0,
         '{"autoOffsetReset":"earliest"}',
+        3,
+        2000,
+        1.5,
+        TRUE,
+        'import-sim-topic.DLQ',
         'Main SIM import',
         'Consumer handle import single sim'
     );

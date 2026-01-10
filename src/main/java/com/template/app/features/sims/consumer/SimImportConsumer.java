@@ -24,6 +24,11 @@ public class SimImportConsumer implements MessageHandler<SimCmd> {
             return;
         }
 
+        if ("9999999999".equals(cmd.getSimPhoneNumber())) {
+            log.warn(">>> SIMULATION: Triggering Artificial Error for DLQ Test! <<<");
+            throw new RuntimeException("Simulated processing error for DLQ testing");
+        }
+
         log.info("Received created Sim: {}", cmd);
 
         try {
