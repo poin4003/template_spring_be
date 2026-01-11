@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.template.app.base.BaseEntity;
 import com.template.app.features.error.enums.ErrorCategoryEnum;
+import com.template.app.features.error.vo.ExceptionClassMapping;
+import com.template.app.handler.JsonTypeHanlder;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,4 +33,7 @@ public class SystemErrorDefinationEntity extends BaseEntity {
 
     @TableField("category")
     private ErrorCategoryEnum category;
+
+    @TableField(value = "exception_class_name", typeHandler = JsonTypeHanlder.class)
+    private ExceptionClassMapping exceptionClassName;
 }

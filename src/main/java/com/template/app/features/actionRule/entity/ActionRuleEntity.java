@@ -6,12 +6,12 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.template.app.base.BaseEntity;
 import com.template.app.features.actionRule.enums.ActionRuleStatusEnum;
 import com.template.app.features.actionRule.enums.RuleActionTypeEnum;
 import com.template.app.features.actionRule.enums.RuleTargetTypeEnum;
 import com.template.app.features.actionRule.vo.ActionConfig;
+import com.template.app.handler.JsonTypeHanlder;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -36,7 +36,7 @@ public class ActionRuleEntity extends BaseEntity {
     @TableField("action_type")
     private RuleActionTypeEnum actionType;
 
-    @TableField(value = "action_config", typeHandler = JacksonTypeHandler.class)
+    @TableField(value = "action_config", typeHandler = JsonTypeHanlder.class)
     private ActionConfig actionConfig;
 
     @TableField("priority")

@@ -22,12 +22,6 @@ public class MqConsumerRegistrationCmd {
 
     private Map<String, Object> transportConfig;
 
-    private Integer maxRetryAttempts;
-
-    private Long retryBackoffMs;
-
-    private Double retryMultiplier;
-
     private Boolean enableDlq;
 
     private String dlqName;

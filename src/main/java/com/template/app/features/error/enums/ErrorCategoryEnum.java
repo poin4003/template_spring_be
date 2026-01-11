@@ -7,11 +7,12 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorCategoryEnum implements BaseEnum {
-    SYSTEM(1, "Infrastructure error"),
+    INFRASTRUCTURE(1, "Infrastructure error"),
     BUSINESS(2, "Business error"),
     VALIDATION(3, "Validation error"),
     SECURITY(4, "Security error"),
-    THIRD_PARTY(5, "Third party error")
+    THIRD_PARTY(5, "Third party error"),
+    UNKNOWN(6, "Unknown system error")
     ;
     private final int code;
     private final String description;
