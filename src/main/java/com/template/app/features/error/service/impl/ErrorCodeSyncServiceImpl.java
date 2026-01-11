@@ -10,6 +10,8 @@ import com.template.app.core.response.ResultCode;
 import com.template.app.core.sync.SyncableDataService;
 import com.template.app.features.error.entity.SystemErrorDefinationEntity;
 import com.template.app.features.error.repository.SystemErrorDefinationRepository;
+import com.template.app.features.error.vo.ExceptionClassMapping;
+import com.template.app.features.error.vo.JavaExceptionConfig;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +45,15 @@ public class ErrorCodeSyncServiceImpl implements SyncableDataService {
                     .eq(SystemErrorDefinationEntity::getErrorCode, enumCode.code())
             );
 
+            String className = enumCode.getExceptionClass().getName(); 
+
+            ExceptionClassMapping jsonMapping = ExceptionClassMapping.builder()
+                .java(JavaExceptionConfig.builder()
+                    .className(className)
+                    .matchStrategy("EQUALS")
+                    .build()
+                ).build();
+
             if (existingDef == null) {
                 SystemErrorDefinationEntity newDef = new SystemErrorDefinationEntity();
 
@@ -52,6 +63,7 @@ public class ErrorCodeSyncServiceImpl implements SyncableDataService {
                 newDef.setAliasKey(enumCode.name());
                 newDef.setHttpStatus(enumCode.httpStatus());
                 newDef.setCategory(enumCode.getCategory());
+                newDef.setExceptionClassName(jsonMapping);
 
                 errorRepo.insert(newDef);
                 inserted++;
@@ -75,6 +87,13 @@ public class ErrorCodeSyncServiceImpl implements SyncableDataService {
                 if (enumCode.getCategory() != existingDef.getCategory()) {
                     isChanged = true;
                     existingDef.setCategory(enumCode.getCategory());
+                }
+                
+                if (existingDef.getExceptionClassName() == null 
+                    || !existingDef.getExceptionClassName().equals(jsonMapping)
+                ) {
+                    isChanged = true;
+                    existingDef.setExceptionClassName(jsonMapping);
                 }
 
                 if (isChanged) {

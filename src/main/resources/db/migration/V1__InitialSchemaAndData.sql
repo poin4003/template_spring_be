@@ -27,6 +27,8 @@ CREATE TABLE system_error_definations (
     http_status INT NOT NULL,
     category INT NOT NULL,
 
+    exception_class_name JSONB,
+
     note TEXT,
     description TEXT,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -259,10 +261,6 @@ CREATE TABLE mq_consumer_details (
     handler_key VARCHAR(255) NOT NULL,
     transport_config JSONB,
 
-    max_retry_attempts INT DEFAULT 0,
-    retry_backoff_ms BIGINT DEFAULT 1000,
-    retry_multiplier DOUBLE PRECISION DEFAULT 1.0,
-
     enable_dlq BOOLEAN DEFAULT FALSE,
     dlq_name VARCHAR(255),
 
@@ -365,9 +363,6 @@ BEGIN
         handler_key,
         transport_config,
 
-        max_retry_attempts,
-        retry_backoff_ms,
-        retry_multiplier,
         enable_dlq,
         dlq_name,
 
@@ -382,9 +377,6 @@ BEGIN
         3,
         'simImportConsumer',
         '{"autoOffsetReset":"earliest"}',
-        3,
-        2000,
-        1.5,
         TRUE,
         'import-sim-topic.DLQ',
         'Main SIM import',

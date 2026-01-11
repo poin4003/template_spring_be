@@ -1,5 +1,6 @@
 package com.template.app.core.exception;
 
+import com.template.app.core.exception.category.InfrastructureException;
 import com.template.app.core.response.ResultCode;
 
 public final class ExceptionFactory {
@@ -9,11 +10,13 @@ public final class ExceptionFactory {
     private static MyException create(ResultCode code, String messageDetail) {
         String finalMessge = (messageDetail == null || messageDetail.trim().isEmpty() ? null : messageDetail);
 
-        return new MyException(
-            code,
-            code.httpStatus(),
-            finalMessge
-        );
+        try {
+            return code.getExceptionClass()
+                    .getConstructor(ResultCode.class, int.class, String.class)
+                    .newInstance(code, code.httpStatus(), finalMessge);
+        } catch (Exception e) {
+            return new InfrastructureException(ResultCode.ERROR, 500, finalMessge);
+        }
     }
 
     public static MyException dataNotFound() {

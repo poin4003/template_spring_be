@@ -21,8 +21,15 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.backoff.BackOff;
+import org.springframework.util.backoff.ExponentialBackOff;
 import org.springframework.util.backoff.FixedBackOff;
 
+import com.template.app.config.settings.AppProperties;
+import com.template.app.core.exception.category.AppSecurityException;
+import com.template.app.core.exception.category.BusinessException;
+import com.template.app.core.exception.category.UnknownException;
+import com.template.app.core.exception.category.ValidationException;
 import com.template.app.core.mq.handler.MessageHandler;
 import com.template.app.core.mq.handler.MessageHandlerRegistry;
 import com.template.app.core.mq.type.LogicalTypeIdMapper;
@@ -44,7 +51,8 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
     private final KafkaProperties kafkaProperties;
     private final MessageHandlerMethodFactory handlerMethodFactory;
     private final PayloadTypeRegistry payloadTypeRegistry;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate; 
+    private final AppProperties appProperties;
 
     @Override
     public void registerMqConsumer(MqConsumerRegistrationCmd cmd) {
@@ -150,18 +158,41 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
     }
 
     private DefaultErrorHandler createErrorHandler(MqConsumerRegistrationCmd cmd) {
-        long backoffInterval = (cmd.getRetryBackoffMs() != null) ? cmd.getRetryBackoffMs() : 1000L;
-        int maxAttempts = (cmd.getMaxRetryAttempts() != null) ? cmd.getMaxRetryAttempts() : 0;
+        Integer retryMaxAttempt = appProperties.getMq().getRetry().getDefaultMaxAttempts();
+        Long retryBackoffMs = appProperties.getMq().getRetry().getDefaultBackoffMs();
+        Double multiplier = appProperties.getMq().getRetry().getDefaultMultiplier();
 
-        FixedBackOff backOff = new FixedBackOff(backoffInterval, maxAttempts);
-
+        BackOff backOff = resolveBackoffPolicy(retryBackoffMs, retryMaxAttempt, multiplier); 
         ConsumerRecordRecoverer recoverer = createRecoverer(cmd);
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(
+            recoverer, Objects.requireNonNull(backOff, "Backoff must not be null")
+        );
 
-        DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, backOff);
-
-        errorHandler.addNotRetryableExceptions(IllegalArgumentException.class);
-
+        errorHandler.addNotRetryableExceptions(
+            BusinessException.class,
+            ValidationException.class,
+            AppSecurityException.class,
+            UnknownException.class,
+            IllegalArgumentException.class, 
+            NullPointerException.class
+        );
+        
         return errorHandler;
+    }
+
+    private BackOff resolveBackoffPolicy(Long initialInterval, int maxAttempts, double multiplier) {
+        if (multiplier <= 1.0) {
+            return new FixedBackOff(initialInterval, maxAttempts);
+        }
+
+        ExponentialBackOff expBackOff = new ExponentialBackOff();
+        expBackOff.setInitialInterval(initialInterval);
+        expBackOff.setMultiplier(multiplier);
+        
+        long maxElapsedTime = calculateMaxElapsedTime(initialInterval, multiplier, maxAttempts);
+        expBackOff.setMaxElapsedTime(maxElapsedTime);
+
+        return expBackOff;
     }
 
     private ConsumerRecordRecoverer createRecoverer(MqConsumerRegistrationCmd cmd) {
@@ -184,5 +215,17 @@ public class DynamicMqlistenerServiceImpl implements DynamicMqListenerService {
             Objects.requireNonNull(kafkaTemplate, "kafkaTemplate must not be null"),
             (record, ex) -> new TopicPartition(dlqName, -1)
         );
+    }
+
+    private long calculateMaxElapsedTime(Long initialInterval, double multiplier, int maxAttempts) {
+        long totalTime = 0;
+        long currentInterval = initialInterval;
+
+        for (int i = 0; i < maxAttempts; i++) {
+            totalTime += currentInterval;
+            currentInterval = (long) (currentInterval * multiplier);
+        }
+
+        return totalTime + 1000L;
     }
 }

@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.template.app.config.jwt.dto.JwtPayload;
-import com.template.app.config.jwt.dto.JwtProperties;
 import com.template.app.config.security.crypto.CryptoStrategy;
 import com.template.app.config.security.crypto.dto.KeyPairDto;
+import com.template.app.config.settings.AppProperties;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -23,8 +23,8 @@ import java.security.Key;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
+    private final AppProperties appProperties;
     private final ObjectMapper objectMapper;
-    private final JwtProperties jwtProperties;
     private final CryptoStrategy cryptoStrategy;
 
     public KeyPairDto generateKeyPair() {
@@ -38,7 +38,7 @@ public class JwtTokenProvider {
     public String generateAccessToken(UUID userId, JwtPayload payload, String privateKeyStr) {
         try {
             long now = System.currentTimeMillis();
-            long expiryDate = now + jwtProperties.getAccessTokenExpirationMs(); 
+            long expiryDate = now + appProperties.getJwt().getAccessTokenExpirationMs(); 
 
             Key key = cryptoStrategy.getSigningKey(privateKeyStr);
 
@@ -59,7 +59,7 @@ public class JwtTokenProvider {
     public String generateRefreshToken(UUID userId, String privateKeyStr) {
         try {
             long now = System.currentTimeMillis();
-            long expiryDate = now + jwtProperties.getRefreshTokenExpirationMs();
+            long expiryDate = now + appProperties.getJwt().getRefreshTokenExpirationMs();
 
             Key key = cryptoStrategy.getSigningKey(privateKeyStr);
 

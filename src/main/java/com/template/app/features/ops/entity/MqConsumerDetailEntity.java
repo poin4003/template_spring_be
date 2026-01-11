@@ -58,27 +58,6 @@ public class MqConsumerDetailEntity extends BaseEntity {
     private Map<String, Object> transportConfig;
 
     /**
-     * Max retry attemps
-     * Number of retries when an error occurs
-     */
-    @TableField("max_retry_attempts")
-    private Integer maxRetryAttempts;
-
-    /**
-     * Retry backoff ms
-     * Retry time when an error occurs
-     */
-    @TableField("retry_backoff_ms")
-    private Long retryBackoffMs;
-
-    /**
-     * Multiplier retry
-     * Multiples of the time each retry
-     */
-    @TableField("retry_multiplier")
-    private Double retryMultiplier;
-
-    /**
      * Enabled dlq
      * Active dlq
      */
