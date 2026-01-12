@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.template.app.config.jwt.dto.JwtPayload;
 import com.template.app.features.auth.service.KeyStoreService;
 import com.template.app.features.auth.service.schema.result.KeyStoreResult;
 import com.template.app.features.auth.service.schema.result.UserPrincipal;

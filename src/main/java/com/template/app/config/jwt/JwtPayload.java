@@ -1,4 +1,4 @@
-package com.template.app.config.jwt.dto;
+package com.template.app.config.jwt;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

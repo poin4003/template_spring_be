@@ -1,4 +1,4 @@
-package com.template.app.features.actionRule.enums;
+package com.template.app.features.action.enums;
 
 import com.template.app.base.BaseEnum;
 import com.template.app.utils.EnumUtils;
@@ -6,7 +6,7 @@ import com.template.app.utils.EnumUtils;
 import lombok.Getter;
 
 @Getter
-public enum ActionRuleStatusEnum implements BaseEnum {
+public enum ActionStatusEnum implements BaseEnum {
     ACTIVE(1, "ACTIVE"),
     INACTIVE(2, "INACTIVE")
     ;
@@ -14,12 +14,12 @@ public enum ActionRuleStatusEnum implements BaseEnum {
     private final int code;
     private final String description;
 
-    ActionRuleStatusEnum(int code, String description) {
+    ActionStatusEnum(int code, String description) {
         this.code = code;
         this.description = description;
     }
 
-    public static ActionRuleStatusEnum fromCode(int code) {
-        return EnumUtils.fromCode(ActionRuleStatusEnum.class, code);
+    public static ActionStatusEnum fromCode(int code) {
+        return EnumUtils.fromCode(ActionStatusEnum.class, code);
     }
 }

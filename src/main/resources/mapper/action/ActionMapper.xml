@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.template.app.features.actionRule.repository.ActionRuleRepository">
+<mapper namespace="com.template.app.features.action.repository.ActionRepository">
 
-    <resultMap id="BaseResultMap" type="com.template.app.features.actionRule.entity.ActionRuleEntity">
-        <id column="rule_id" property="ruleId" />
+    <resultMap id="BaseResultMap" type="com.template.app.features.action.entity.ActionEntity">
+        <id column="action_id" property="actionId" />
         
-        <result column="rule_name" property="ruleName" />
+        <result column="action_name" property="actionName" />
         <result column="target_type" property="targetType" />
         <result column="target_id" property="targetId" /> 
         <result column="action_type" property="actionType" />
@@ -22,10 +22,10 @@
         <result column="updated_at" property="updatedAt" />
     </resultMap>
 
-    <select id="findMatchedRuleByCode" resultMap="BaseResultMap">
+    <select id="findMatchedAction" resultMap="BaseResultMap">
         SELECT DISTINCT r.*
-        FROM action_rules r
-        INNER JOIN action_rule_mappings m ON r.rule_id = m.rule_id
+        FROM actions r
+        INNER JOIN action_mappings m ON r.action_id = m.action_id
         INNER JOIN system_error_definations e ON m.error_id = e.error_id 
         WHERE r.status = 1 
             AND (r.target_id = #{targetId} OR r.target_type = 'GLOBAL')  

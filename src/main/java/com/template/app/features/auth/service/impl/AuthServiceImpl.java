@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.template.app.config.jwt.JwtPayload;
 import com.template.app.config.jwt.JwtTokenProvider;
-import com.template.app.config.jwt.dto.JwtPayload;
 import com.template.app.config.security.crypto.dto.KeyPairDto;
 import com.template.app.features.auth.entity.KeyStoreEntity;
 import com.template.app.features.auth.entity.ConsumedRefreshTokenEntity;
