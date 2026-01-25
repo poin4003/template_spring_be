@@ -26,9 +26,9 @@
         SELECT DISTINCT r.*
         FROM actions r
         INNER JOIN action_mappings m ON r.action_id = m.action_id
-        INNER JOIN system_error_definations e ON m.error_id = e.error_id 
+        INNER JOIN system_error_definitions e ON m.error_id = e.error_id 
         WHERE r.status = 1 
-            AND (r.target_id = #{targetId} OR r.target_type = 'GLOBAL')  
+            AND (r.target_id = #{targetId} OR r.target_type = 0)  
             AND e.error_code = #{errorCode}
             AND e.category = #{category} 
         ORDER BY r.priority DESC, r.target_type DESC

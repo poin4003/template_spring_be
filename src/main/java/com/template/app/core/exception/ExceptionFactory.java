@@ -90,4 +90,12 @@ public final class ExceptionFactory {
     public static MyException myError(ResultCode resultCode, String messageDetail) {
         return create(resultCode, messageDetail);
     }
+
+    public static MyException importSimError() {
+        return create(ResultCode.IMPORT_SIM_ERROR, null);
+    }
+
+    public static MyException importSimError(String messageDetail) {
+        return create(ResultCode.IMPORT_SIM_ERROR, messageDetail);
+    }
 }

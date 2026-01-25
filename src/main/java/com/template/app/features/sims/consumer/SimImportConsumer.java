@@ -2,6 +2,7 @@ package com.template.app.features.sims.consumer;
 
 import org.springframework.stereotype.Component;
 
+import com.template.app.core.exception.ExceptionFactory;
 import com.template.app.core.mq.handler.MessageHandler;
 import com.template.app.features.sims.service.SimService;
 import com.template.app.features.sims.service.schema.command.SimCmd;
@@ -26,7 +27,7 @@ public class SimImportConsumer implements MessageHandler<SimCmd> {
 
         if ("9999999999".equals(cmd.getSimPhoneNumber())) {
             log.warn(">>> SIMULATION: Triggering Artificial Error for DLQ Test! <<<");
-            throw new RuntimeException("Simulated processing error for DLQ testing");
+            throw ExceptionFactory.importSimError();
         }
 
         log.info("Received created Sim: {}", cmd);
