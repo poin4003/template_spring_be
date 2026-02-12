@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.template.app.features.ops.repository.CronJobConfigRepository">
+
+    <resultMap id="BaseResultMap" type="com.template.app.features.ops.entity.CronJobConfigEntity">
+        <id column="service_endpoint_config_id" property="endpointConfigId" />
+        <result column="job_name" property="jobName" />
+        <result column="cron_expression" property="cronExpression" />
+        <result column="job_type" property="jobType" />
+        <result column="description" property="description" />
+        <result column="lock_at_most_for" property="lockAtMostFor" />
+        <result column="lock_at_least_for" property="lockAtLeastFor" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+        <result column="created_by" property="createdBy" />
+        <result column="updated_by" property="updatedBy" />
+    </resultMap>
+
+    <select id="findAllActiveJobs" resultMap="BaseResultMap"> SELECT c.service_endpoint_config_id,
+        c.job_name, c.cron_expression, c.job_type, c.description, c.lock_at_most_for,
+        c.lock_at_least_for, c.created_at, c.updated_at, c.created_by, c.updated_by FROM
+        cronjob_configs c INNER JOIN service_endpoint_configs s ON c.service_endpoint_config_id =
+        s.service_endpoint_config_id WHERE s.endpoint_status = #{status} </select>
+
+</mapper>
