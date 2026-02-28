@@ -22,14 +22,12 @@ import com.template.app.features.ops.scheduler.JobHandler;
 import com.template.app.features.ops.service.CronJobService;
 
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class CronJobServiceImpl implements CronJobService {
 
     private final TaskScheduler taskScheduler;
@@ -41,7 +39,7 @@ public class CronJobServiceImpl implements CronJobService {
 
     private final RedisService redisService;
     private static final String CRON_STATUS_PREFIX = "ops:cronjob:status";
-
+    
     public CronJobServiceImpl(
             TaskScheduler taskScheduler,
             LockingTaskExecutor lockingTaskExecutor,

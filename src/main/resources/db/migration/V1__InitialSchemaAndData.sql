@@ -5,6 +5,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 DROP TABLE IF EXISTS system_error_definitions CASCADE;
 DROP TABLE IF EXISTS system_error_messages CASCADE;
+DROP TABLE IF EXISTS cronjob_configs CASCADE;
 DROP TABLE IF EXISTS mq_consumer_details CASCADE;
 DROP TABLE IF EXISTS service_endpoint_configs CASCADE;
 DROP TABLE IF EXISTS sims CASCADE;
@@ -280,6 +281,31 @@ CREATE TABLE mq_consumer_details (
 );
 
 ----------------------------------------------------
+-- 4. CREATE TABLE: cronjob_configs
+----------------------------------------------------
+CREATE TABLE cronjob_configs (
+    service_endpoint_config_id UUID PRIMARY KEY,
+
+    job_name VARCHAR(255) NOT NULL,
+    cron_expression VARCHAR(50) NOT NULL,
+    job_type VARCHAR(100) NOT NULL,
+    
+    lock_at_most_for VARCHAR(20) DEFAULT 'PT10M',
+    lock_at_least_for VARCHAR(20) DEFAULT 'PT30S',
+
+    note TEXT,
+    description TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_cronjob_endpoint
+        FOREIGN KEY (service_endpoint_config_id)
+        REFERENCES service_endpoint_configs(service_endpoint_config_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+----------------------------------------------------
 -- 7. SEED DATA
 ----------------------------------------------------
 DO $$
@@ -342,6 +368,7 @@ BEGIN
     INSERT INTO service_endpoint_configs
     (
         service_endpoint_config_id,
+        endpoint_name,
         endpoint_type,
         endpoint_status,
         note,
@@ -350,6 +377,7 @@ BEGIN
     VALUES
     (
         'c9c6e9af-feb1-4464-a4e6-015c1fbd8d70',
+        'import-sim-topic',
         1,
         1,
         'SIM import listener',
