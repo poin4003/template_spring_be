@@ -3,8 +3,9 @@
 ----------------------------------------------------
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-DROP TABLE IF EXISTS system_error_definations CASCADE;
+DROP TABLE IF EXISTS system_error_definitions CASCADE;
 DROP TABLE IF EXISTS system_error_messages CASCADE;
+DROP TABLE IF EXISTS cronjob_configs CASCADE;
 DROP TABLE IF EXISTS mq_consumer_details CASCADE;
 DROP TABLE IF EXISTS service_endpoint_configs CASCADE;
 DROP TABLE IF EXISTS sims CASCADE;
@@ -20,7 +21,7 @@ DROP TABLE IF EXISTS permissions CASCADE;
 ----------------------------------------------------
 -- ERROR DEFINATION TABLES (Inherit BaseEntity)
 ----------------------------------------------------
-CREATE TABLE system_error_definations (
+CREATE TABLE system_error_definitions (
     error_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     error_code INT NOT NULL UNIQUE,
     alias_key VARCHAR(100) NOT NULL,
@@ -48,7 +49,7 @@ CREATE TABLE system_error_messages (
 
     CONSTRAINT fk_message_defination
         FOREIGN KEY (error_defination_id)
-        REFERENCES system_error_definations(error_id)
+        REFERENCES system_error_definitions(error_id)
         ON DELETE CASCADE,
 
     CONSTRAINT uq_defination_language UNIQUE (error_defination_id, language_code)
@@ -57,29 +58,29 @@ CREATE TABLE system_error_messages (
 ----------------------------------------------------
 -- ACTION RULE TABLES (Inherit BaseEntity)
 ----------------------------------------------------
-CREATE TABLE action_rules (
-    rule_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    rule_name VARCHAR(255),
+CREATE TABLE actions (
+    action_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    action_name VARCHAR(255),
+    target_type INT,
+    target_id UUID,
     action_type INT,
     action_config JSONB,
     priority INT,
-    status INT,
-    target_type INT,
-    target_id UUID
+    status INT
 );
 
-CREATE TABLE action_rule_mappings (
-    rule_id UUID NOT NULL,
+CREATE TABLE action_mappings (
+    action_id UUID NOT NULL,
 
     error_id UUID NOT NULL,
 
-    PRIMARY KEY (rule_id, error_id),
+    PRIMARY KEY (action_id, error_id),
 
-    CONSTRAINT fk_arm_rule FOREIGN KEY (rule_id) REFERENCES action_rules(rule_id) ON DELETE CASCADE,
-    CONSTRAINT fk_arm_error FOREIGN KEY (error_id) REFERENCES system_error_definations(error_id) ON DELETE CASCADE
+    CONSTRAINT fk_arm_rule FOREIGN KEY (action_id) REFERENCES actions(action_id) ON DELETE CASCADE,
+    CONSTRAINT fk_arm_error FOREIGN KEY (error_id) REFERENCES system_error_definitions(error_id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_arm_error ON action_rule_mappings(error_id);
+CREATE INDEX idx_arm_error ON action_mappings(error_id);
 
 ----------------------------------------------------
 -- 2. RBAC TABLES (Inherit BaseEntity)
@@ -239,6 +240,8 @@ CREATE TABLE sims (
 CREATE TABLE service_endpoint_configs (
     service_endpoint_config_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
+    endpoint_name VARCHAR(255) NOT NULL,
+
     endpoint_type INT NOT NULL,
     endpoint_status INT NOT NULL,
 
@@ -271,6 +274,31 @@ CREATE TABLE mq_consumer_details (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_mq_consumer_endpoint
+        FOREIGN KEY (service_endpoint_config_id)
+        REFERENCES service_endpoint_configs(service_endpoint_config_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+----------------------------------------------------
+-- 4. CREATE TABLE: cronjob_configs
+----------------------------------------------------
+CREATE TABLE cronjob_configs (
+    service_endpoint_config_id UUID PRIMARY KEY,
+
+    job_name VARCHAR(255) NOT NULL,
+    cron_expression VARCHAR(50) NOT NULL,
+    job_type VARCHAR(100) NOT NULL,
+    
+    lock_at_most_for VARCHAR(20) DEFAULT 'PT10M',
+    lock_at_least_for VARCHAR(20) DEFAULT 'PT30S',
+
+    note TEXT,
+    description TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_cronjob_endpoint
         FOREIGN KEY (service_endpoint_config_id)
         REFERENCES service_endpoint_configs(service_endpoint_config_id)
         ON DELETE CASCADE
@@ -340,6 +368,7 @@ BEGIN
     INSERT INTO service_endpoint_configs
     (
         service_endpoint_config_id,
+        endpoint_name,
         endpoint_type,
         endpoint_status,
         note,
@@ -348,6 +377,7 @@ BEGIN
     VALUES
     (
         'c9c6e9af-feb1-4464-a4e6-015c1fbd8d70',
+        'import-sim-topic',
         1,
         1,
         'SIM import listener',

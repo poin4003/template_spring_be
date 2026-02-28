@@ -16,7 +16,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("system_error_definations")
+@TableName("system_error_definitions")
 public class SystemErrorDefinationEntity extends BaseEntity {
 
     @TableId(value = "error_id", type = IdType.ASSIGN_UUID) 

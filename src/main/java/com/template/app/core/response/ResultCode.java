@@ -23,11 +23,13 @@ public enum ResultCode {
     USER_PERMISSION_ERROR(2001, "PERMISSION DENIED", HttpStatus.FORBIDDEN, ErrorCategoryEnum.SECURITY, AppSecurityException.class),
     USER_AUTH_ERROR(2002, "Authentication Failed", HttpStatus.UNAUTHORIZED, ErrorCategoryEnum.SECURITY, AppSecurityException.class),
 
+    IMPORT_SIM_ERROR(3000, "Import sim error", HttpStatus.INTERNAL_SERVER_ERROR, ErrorCategoryEnum.BUSINESS, BusinessException.class),
+
     RESOURCE_NOT_FOUND(4000, "Resource not found", HttpStatus.BAD_REQUEST, ErrorCategoryEnum.BUSINESS, BusinessException.class),
     PARAMS_ERROR(4001, "Invalid param", HttpStatus.BAD_REQUEST, ErrorCategoryEnum.VALIDATION, ValidationException.class),
     RESOURCE_ALREADY_EXIST(4002, "Resource already exists", HttpStatus.BAD_REQUEST, ErrorCategoryEnum.BUSINESS, BusinessException.class),
     
-    ERROR(5000, "Error server occured", HttpStatus.INTERNAL_SERVER_ERROR, ErrorCategoryEnum.INFRASTRUCTURE, UnknownException.class)
+    ERROR(5000, "Error server occured", HttpStatus.INTERNAL_SERVER_ERROR, ErrorCategoryEnum.UNKNOWN, UnknownException.class)
     ;
     
     private final Integer code;

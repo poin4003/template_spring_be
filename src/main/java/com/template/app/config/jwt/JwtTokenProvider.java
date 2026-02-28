@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.template.app.config.jwt.dto.JwtPayload;
 import com.template.app.config.security.crypto.CryptoStrategy;
 import com.template.app.config.security.crypto.dto.KeyPairDto;
 import com.template.app.config.settings.AppProperties;

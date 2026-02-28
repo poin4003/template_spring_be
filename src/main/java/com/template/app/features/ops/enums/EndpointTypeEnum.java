@@ -9,7 +9,7 @@ import lombok.Getter;
 public enum EndpointTypeEnum implements BaseEnum {
     MQ_BROKER_LISTENER(1, "MQ_BROKER_LISTENER"),
     API_WEBHOOK(2, "API_WEBHOOK"),
-    SCHEDULED_JOB(3, "SCHEDULED_JOB"),
+    CRONJOB(3, "CRONJOB"),
     ;
 
     private final int code;
