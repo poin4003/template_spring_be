@@ -104,7 +104,7 @@ mybatis-plus:
 # Logger
 logging:
     level:
-        "[com.template.app]": DEBUG 
+        "[com.app]": DEBUG 
         "[com.baomidou.mybatisplus]": DEBUG  
         "[org.apache.ibatis]": DEBUG 
         "[org.apache.ibatis.type]": DEBUG 
@@ -128,7 +128,7 @@ resilience4j:
                 record-exceptions:
                     - org.springframework.web.client.HttpServerErrorException
                 ignore-exceptions:
-                    - com.template.app.core.exception.MyException
+                    - com.app.core.exception.MyException
     ratelimiter:
         instances:
             default:

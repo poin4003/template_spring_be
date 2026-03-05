@@ -3,9 +3,9 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.template.app.features.rbac.repository.PermissionRepository">
+<mapper namespace="com.app.features.rbac.repository.PermissionRepository">
 
-    <select id="selectPermissionByUserId" resultType="com.template.app.features.rbac.entity.PermissionEntity">
+    <select id="selectPermissionByUserId" resultType="com.app.features.rbac.entity.PermissionEntity">
         SELECT DISTINCT p.permission_id, p.permission_name, p.permission_key
         FROM permissions p
         JOIN role_permissions rp ON p.permission_id = rp.permission_id
@@ -13,7 +13,7 @@
         WHERE ur.user_id = #{userId}
     </select>
 
-    <select id="selectPermissionByRoleId" resultType="com.template.app.features.rbac.entity.PermissionEntity">
+    <select id="selectPermissionByRoleId" resultType="com.app.features.rbac.entity.PermissionEntity">
         SELECT p.permission_id, p.permission_name, p.permission_key
         FROM permissions p
         JOIN role_permissions rp ON p.permission_id = rp.permission_id
