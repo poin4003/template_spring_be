@@ -11,7 +11,7 @@ import com.app.features.action.enums.ActionStatusEnum;
 import com.app.features.action.enums.ActionTypeEnum;
 import com.app.features.action.enums.TargetTypeEnum;
 import com.app.features.action.vo.BaseActionConfig;
-import com.app.features.error.entity.SystemErrorDefinationEntity;
+import com.app.features.error.entity.SystemErrorDefinitionEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -61,5 +61,5 @@ public class ActionEntity extends BaseEntity {
         joinColumns = @JoinColumn(name = "action_id"),
         inverseJoinColumns = @JoinColumn(name = "error_id")
     )
-    private List<SystemErrorDefinationEntity> errors;
+    private List<SystemErrorDefinitionEntity> errors;
 }

@@ -1,16 +1,16 @@
 package com.app.features.error.service.impl;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.app.core.response.ResultCode;
 import com.app.core.sync.SyncableDataService;
-import com.app.features.error.entity.SystemErrorDefinationEntity;
+import com.app.features.error.entity.SystemErrorDefinitionEntity;
 import com.app.features.error.entity.SystemErrorMessageEntity;
-import com.app.features.error.repository.SystemErrorDefinationRepository;
+import com.app.features.error.repository.SystemErrorDefinitionRepository;
 import com.app.features.error.repository.SystemErrorMessageRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ErrorMessageSyncServiceImpl implements SyncableDataService {
 
-    private final SystemErrorDefinationRepository errorRepo;
+    private final SystemErrorDefinitionRepository errorRepo;
     private final SystemErrorMessageRepository errorMessageRepo;
 
     @Override
@@ -41,30 +41,23 @@ public class ErrorMessageSyncServiceImpl implements SyncableDataService {
         String defaultLang = "en";
 
         for (ResultCode enumCode : ResultCode.values()) {
-            SystemErrorDefinationEntity def = errorRepo.selectOne(
-                new LambdaQueryWrapper<SystemErrorDefinationEntity>()
-                    .select(SystemErrorDefinationEntity::getErrorId)
-                    .eq(SystemErrorDefinationEntity::getErrorCode, enumCode.code())
-            );
+            Optional<SystemErrorDefinitionEntity> def = errorRepo.findByCode(enumCode.code());
 
-            if (def == null) continue;
+            if (def.isEmpty())
+                continue;
 
-            boolean exists = errorMessageRepo.exists(
-                new LambdaQueryWrapper<SystemErrorMessageEntity>()
-                    .eq(SystemErrorMessageEntity::getErrorDefinationId, def.getErrorId())
-                    .eq(SystemErrorMessageEntity::getLanguageCode, defaultLang)
-            );
+            SystemErrorDefinitionEntity errorDef = def.get();
 
-            if (!exists) {
+            if (!errorRepo.existsByCode(enumCode.code())) {
                 SystemErrorMessageEntity msg = new SystemErrorMessageEntity();
 
                 UUID msg_id = UUID.randomUUID();
-                msg.setMessageId(msg_id);
-                msg.setErrorDefinationId(def.getErrorId());
+                msg.setId(msg_id);
+                msg.setId(errorDef.getId());
                 msg.setLanguageCode(defaultLang);
-                msg.setMessageContent(enumCode.message());
+                msg.setContent(enumCode.message());
 
-                errorMessageRepo.insert(msg);
+                errorMessageRepo.save(msg);
                 synced++;
             }
         }

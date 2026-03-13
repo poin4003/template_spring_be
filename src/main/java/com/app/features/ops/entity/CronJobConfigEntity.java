@@ -29,11 +29,11 @@ public class CronJobConfigEntity extends BaseEntity {
     @JoinColumn(name = "id")
     private OpsConfigEntity opsConfigEntity;
 
-    @Column(name = "cronjob_name")
-    private String cronjobName;
+    @Column(name = "name")
+    private String name;
 
-    @Column(name = "cron_expression")
-    private String cronExpression;
+    @Column(name = "expression")
+    private String expression;
 
     @Column(name = "job_type")
     private String jobType;

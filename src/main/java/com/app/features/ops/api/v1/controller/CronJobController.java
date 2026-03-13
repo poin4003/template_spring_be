@@ -33,7 +33,7 @@ public class CronJobController extends BaseController {
     @GetMapping("")
     @Operation(summary = "Get all cronjob configs")
     public ResponseEntity<ResultMessage<List<CronJobConfigEntity>>> getAllCronjobs() {
-        List<CronJobConfigEntity> configs = cronJobConfigRepository.selectList(null);
+        List<CronJobConfigEntity> configs = cronJobConfigRepository.findAll();
         log.info("Fetched {} cronjob configs", configs.size());
         return OK("Get cronjob configs success", configs);
     }

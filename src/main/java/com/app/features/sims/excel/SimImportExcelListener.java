@@ -1,27 +1,28 @@
 package com.app.features.sims.excel;
 
+import org.modelmapper.ModelMapper;
+
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.app.features.sims.producer.SimImportProducer;
-import com.app.features.sims.service.schema.SimCoreMapStruct;
-import com.app.features.sims.service.schema.command.SimCmd;
-import com.app.features.sims.service.schema.command.SimExcelImportCmd;
+import com.app.features.sims.cqrs.command.CreateSimCmd;
+import com.app.features.sims.excel.dto.SimExcelImport;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-public class SimImportExcelListener extends AnalysisEventListener<SimExcelImportCmd> {
+public class SimImportExcelListener extends AnalysisEventListener<SimExcelImport> {
     
     private final SimImportProducer simImportProducer;
-    private final SimCoreMapStruct simCoreMapStruct;
+    private final ModelMapper modelMapper;
 
     @Override
-    public void invoke(SimExcelImportCmd data, AnalysisContext context) {
+    public void invoke(SimExcelImport data, AnalysisContext context) {
         log.info("Processing row: {}", context.readRowHolder().getRowIndex());
 
-        SimCmd cmd = simCoreMapStruct.excelToCommand(data);
+        CreateSimCmd cmd = modelMapper.map(data, CreateSimCmd.class);
 
         simImportProducer.sendSimToImportQueue(cmd);
     }

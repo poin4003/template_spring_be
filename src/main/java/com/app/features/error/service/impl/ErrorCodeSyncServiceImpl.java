@@ -1,15 +1,15 @@
 package com.app.features.error.service.impl;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.app.core.response.ResultCode;
 import com.app.core.sync.SyncableDataService;
-import com.app.features.error.entity.SystemErrorDefinationEntity;
-import com.app.features.error.repository.SystemErrorDefinationRepository;
+import com.app.features.error.repository.SystemErrorDefinitionRepository;
+import com.app.features.error.entity.SystemErrorDefinitionEntity;
 import com.app.features.error.vo.ExceptionClassMapping;
 import com.app.features.error.vo.JavaExceptionConfig;
 
@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ErrorCodeSyncServiceImpl implements SyncableDataService {
 
-    private final SystemErrorDefinationRepository errorRepo;
+    private final SystemErrorDefinitionRepository errorRepo;
     
     @Override
     public String getSyncType() {
@@ -40,10 +40,7 @@ public class ErrorCodeSyncServiceImpl implements SyncableDataService {
         int updated = 0;
 
         for (ResultCode enumCode : ResultCode.values()) {
-            SystemErrorDefinationEntity existingDef = errorRepo.selectOne(
-                new LambdaQueryWrapper<SystemErrorDefinationEntity>()
-                    .eq(SystemErrorDefinationEntity::getErrorCode, enumCode.code())
-            );
+            Optional<SystemErrorDefinitionEntity> existingOps = errorRepo.findByCode(enumCode.code());
 
             String className = enumCode.getExceptionClass().getName(); 
 
@@ -54,20 +51,21 @@ public class ErrorCodeSyncServiceImpl implements SyncableDataService {
                     .build()
                 ).build();
 
-            if (existingDef == null) {
-                SystemErrorDefinationEntity newDef = new SystemErrorDefinationEntity();
+            if (existingOps.isEmpty()) {
+                SystemErrorDefinitionEntity newDef = new SystemErrorDefinitionEntity();
 
                 UUID error_id = UUID.randomUUID();
-                newDef.setErrorId(error_id);
-                newDef.setErrorCode(enumCode.code());
+                newDef.setId(error_id);
+                newDef.setCode(enumCode.code());
                 newDef.setAliasKey(enumCode.name());
                 newDef.setHttpStatus(enumCode.httpStatus());
                 newDef.setCategory(enumCode.getCategory());
                 newDef.setExceptionClassName(jsonMapping);
 
-                errorRepo.insert(newDef);
+                errorRepo.save(newDef);
                 inserted++;
             } else {
+                SystemErrorDefinitionEntity existingDef = existingOps.get();
                 boolean isChanged = false;
 
                 if (!enumCode.name().equals(existingDef.getAliasKey())) {
@@ -97,7 +95,7 @@ public class ErrorCodeSyncServiceImpl implements SyncableDataService {
                 }
 
                 if (isChanged) {
-                    errorRepo.updateById(existingDef);
+                    errorRepo.save(existingDef);
                     updated++;
                 }
             }

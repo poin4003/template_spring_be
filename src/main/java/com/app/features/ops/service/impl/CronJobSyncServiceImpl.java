@@ -5,25 +5,23 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.app.core.constant.AppConstants;
-import com.app.core.sync.SyncableDataService;
-import com.app.features.ops.annotation.CronJobDef;
-import com.app.features.ops.entity.CronJobConfigEntity;
-import com.app.features.ops.entity.ServiceEndpointConfigEntity;
-import com.app.features.ops.enums.EndpointStatusEnum;
-import com.app.features.ops.enums.EndpointTypeEnum;
-import com.app.features.ops.repository.CronJobConfigRepository;
-import com.app.features.ops.repository.ServiceEndpointConfigRepository;
-import com.app.features.ops.scheduler.JobHandler;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.app.core.constant.AppConstants;
+import com.app.core.sync.SyncableDataService;
+import com.app.features.ops.annotation.CronJobDef;
+import com.app.features.ops.entity.CronJobConfigEntity;
+import com.app.features.ops.entity.OpsConfigEntity;
+import com.app.features.ops.enums.OpsStatusEnum;
+import com.app.features.ops.enums.OpsTypeEnum;
+import com.app.features.ops.repository.CronJobConfigRepository;
+import com.app.features.ops.repository.OpsConfigRepository;
+import com.app.features.ops.scheduler.JobHandler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CronJobSyncServiceImpl implements SyncableDataService {
 
     private final CronJobConfigRepository cronJobRepo;
-    private final ServiceEndpointConfigRepository endpointRepo;
+    private final OpsConfigRepository opsConfigRepo;
     private final ApplicationContext applicationContext;
 
     @Override
@@ -52,8 +50,7 @@ public class CronJobSyncServiceImpl implements SyncableDataService {
     public void syncToDatabase() {
         log.info("[Sync] Scanning for Cronjob defination...");
 
-        List<CronJobConfigEntity> existingJobs = cronJobRepo.selectList(
-                new LambdaQueryWrapper<CronJobConfigEntity>().select(CronJobConfigEntity::getJobType));
+        List<CronJobConfigEntity> existingJobs = cronJobRepo.findAll();
 
         Set<String> existingJobTypes = existingJobs.stream()
                 .map(CronJobConfigEntity::getJobType)
@@ -72,7 +69,7 @@ public class CronJobSyncServiceImpl implements SyncableDataService {
                 if (def == null) {
                     log.warn("[Sync] Annotation is null for class {}. Skipping.", clazz.getSimpleName());
                     continue;
-                } 
+                }
 
                 JobHandler handler = (JobHandler) applicationContext.getBean(clazz);
                 String jobType = handler.getSupportedJobType();
@@ -84,22 +81,22 @@ public class CronJobSyncServiceImpl implements SyncableDataService {
 
                 UUID newId = UUID.randomUUID();
 
-                ServiceEndpointConfigEntity endpoint = new ServiceEndpointConfigEntity();
-                endpoint.setServiceEndpointConfigId(newId);
-                endpoint.setEndpointName(def.jobName().toLowerCase().replace(" ", "-"));
+                OpsConfigEntity opsConfig = new OpsConfigEntity();
+                opsConfig.setId(newId);
+                opsConfig.setName(def.jobName().toLowerCase().replace(" ", "-"));
 
-                endpoint.setEndpointType(EndpointTypeEnum.CRONJOB);
-                endpoint.setEndpointStatus(EndpointStatusEnum.ACTIVE);
-                endpointRepo.insert(endpoint);
+                opsConfig.setType(OpsTypeEnum.CRONJOB);
+                opsConfig.setStatus(OpsStatusEnum.ACTIVE);
+                opsConfigRepo.save(opsConfig);
 
                 CronJobConfigEntity cronConfig = new CronJobConfigEntity();
-                cronConfig.setEndpointConfigId(newId);
-                cronConfig.setCronjobName(def.jobName());
-                cronConfig.setCronExpression(def.cronExpression());
+                cronConfig.setId(newId);
+                cronConfig.setName(def.jobName());
+                cronConfig.setExpression(def.cronExpression());
                 cronConfig.setJobType(jobType);
                 cronConfig.setLockAtLeastFor(def.lockAtLeastFor());
                 cronConfig.setLockAtMostFor(def.lockAtMostFor());
-                cronJobRepo.insert(cronConfig);
+                cronJobRepo.save(cronConfig);
 
                 log.info("[Sync] Seeded new CronJob: [{}] with cron: [{}]", jobType, def.cronExpression());
                 insertCount++;

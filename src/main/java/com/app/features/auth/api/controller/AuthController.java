@@ -1,26 +1,28 @@
 package com.app.features.auth.api.controller;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.app.core.controller.BaseController;
+import com.app.core.security.UserPrincipal;
 import com.app.core.vo.ResultMessage;
-import com.app.features.auth.api.dto.AuthMapStruct;
 import com.app.features.auth.api.dto.request.LoginRequest;
 import com.app.features.auth.api.dto.request.RefreshTokenRequest;
 import com.app.features.auth.api.dto.response.LoginResponse;
-import com.app.features.auth.service.AuthService;
-import com.app.features.auth.service.schema.command.LoginCmd;
-import com.app.features.auth.service.schema.result.LoginResult;
-import com.app.features.auth.service.schema.result.UserPrincipal;
+import com.app.features.auth.cqrs.command.LoginCmd;
+import com.app.features.auth.cqrs.command.LogoutCmd;
+import com.app.features.auth.cqrs.command.RefreshTokenCmd;
+import com.app.features.auth.cqrs.result.LoginResult;
 
+import an.awesome.pipelinr.Pipeline;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
 
 @RestController
 @Slf4j
@@ -29,43 +31,44 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Tag(name = "Authentication V1", description = "Auth docs")
 public class AuthController extends BaseController {
 
-    private final AuthService authService;
-    private final AuthMapStruct authMapStruct;
+    private final Pipeline pipeline;
+    private final ModelMapper modelMapper;
 
     @PostMapping("/login")
     public ResponseEntity<ResultMessage<LoginResponse>> login(
-        @RequestBody LoginRequest request
-        // @ClientIp String ipAddress
+            @RequestBody LoginRequest req
+    // @ClientIp String ipAddress
     ) {
         String ipAddress = "192.168.1.100";
 
-        LoginCmd cmd = LoginCmd.builder()
-                            .userEmail(request.getUserEmail())
-                            .userPassword(request.getUserPassword())
-                            .ipAddress(ipAddress)
-                            .build();
+        LoginCmd cmd = new LoginCmd(
+                req.getEmail(),
+                req.getPassword(),
+                ipAddress);
 
-        LoginResult result = authService.login(cmd);
+        LoginResult result = pipeline.send(cmd);
 
-        return OK("Login success", authMapStruct.toLoginResponse(result)); 
+        return OK("Login success", modelMapper.map(result, LoginResponse.class));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<ResultMessage<LoginResponse>> refreshToken(
-        @RequestBody RefreshTokenRequest request
-    ) {
-        LoginResult result = authService.refreshToken(request.getRefreshToken());
+            @RequestBody RefreshTokenRequest req) {
+        RefreshTokenCmd cmd = new RefreshTokenCmd(req.getRefreshToken());
 
-        return OK("Refresh token success", authMapStruct.toLoginResponse(result));
+        LoginResult result = pipeline.send(cmd);
+
+        return OK("Refresh token success", modelMapper.map(result, LoginResponse.class));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<ResultMessage<Void>> logout(@AuthenticationPrincipal UserPrincipal currentUser) {
-        if (currentUser != null && currentUser.getKeyStore() != null)  {
-            authService.logout(
-                currentUser.getKeyStore().getKeyStoreId(),
-                currentUser.getUserId()
-            );
+        if (currentUser != null && currentUser.getKeyStore() != null) {
+            LogoutCmd cmd = new LogoutCmd(
+                    currentUser.getKeyStore().getKeyStoreId(),
+                    currentUser.getUserId());
+
+            pipeline.send(cmd);
         }
         return OK("Logout success", null);
     }

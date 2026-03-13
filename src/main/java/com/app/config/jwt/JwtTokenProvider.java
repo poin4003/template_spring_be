@@ -1,22 +1,21 @@
 package com.app.config.jwt;
 
+import java.security.Key;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.app.config.security.crypto.CryptoStrategy;
 import com.app.config.security.crypto.dto.KeyPairDto;
 import com.app.config.settings.AppProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
-
-import java.security.Key;
 
 @Component
 @RequiredArgsConstructor
@@ -37,19 +36,20 @@ public class JwtTokenProvider {
     public String generateAccessToken(UUID userId, JwtPayload payload, String privateKeyStr) {
         try {
             long now = System.currentTimeMillis();
-            long expiryDate = now + appProperties.getJwt().getAccessTokenExpirationMs(); 
+            long expiryDate = now + appProperties.getJwt().getAccessTokenExpirationMs();
 
             Key key = cryptoStrategy.getSigningKey(privateKeyStr);
 
-            Map<String, Object> claims = objectMapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
+            Map<String, Object> claims = objectMapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
+            });
 
             return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(userId.toString())
-                .setIssuedAt(new Date(now))
-                .setExpiration(new Date(expiryDate))
-                .signWith(key, cryptoStrategy.getAlgorithm())
-                .compact();
+                    .setClaims(claims)
+                    .setSubject(userId.toString())
+                    .setIssuedAt(new Date(now))
+                    .setExpiration(new Date(expiryDate))
+                    .signWith(key, cryptoStrategy.getAlgorithm())
+                    .compact();
         } catch (Exception e) {
             throw new RuntimeException("Could not generate token", e);
         }
@@ -63,11 +63,11 @@ public class JwtTokenProvider {
             Key key = cryptoStrategy.getSigningKey(privateKeyStr);
 
             return Jwts.builder()
-                .setSubject(userId.toString())
-                .setIssuedAt(new Date(now))
-                .setExpiration(new Date(expiryDate))
-                .signWith(key, cryptoStrategy.getAlgorithm())
-                .compact();
+                    .setSubject(userId.toString())
+                    .setIssuedAt(new Date(now))
+                    .setExpiration(new Date(expiryDate))
+                    .signWith(key, cryptoStrategy.getAlgorithm())
+                    .compact();
         } catch (Exception e) {
             throw new RuntimeException("Could not generate refresh token", e);
         }
@@ -77,9 +77,9 @@ public class JwtTokenProvider {
         try {
             String tokenWithoutSignature = token.substring(0, token.lastIndexOf('.') + 1);
             Claims claims = Jwts.parserBuilder()
-                                .build()
-                                .parseClaimsJwt(tokenWithoutSignature)
-                                .getBody();
+                    .build()
+                    .parseClaimsJwt(tokenWithoutSignature)
+                    .getBody();
 
             String sub = claims.getSubject();
 
@@ -94,9 +94,9 @@ public class JwtTokenProvider {
             Key key = cryptoStrategy.getVerifyingKey(publicKeyStr);
 
             Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token);
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
 
             return true;
         } catch (Exception e) {
@@ -105,15 +105,15 @@ public class JwtTokenProvider {
     }
 
     public Date getExpiryDateFromToken(String token, String publicKeyStr) {
-        try { 
+        try {
             Key key = cryptoStrategy.getVerifyingKey(publicKeyStr);
 
             return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getExpiration();
 
         } catch (Exception e) {
             return null;
@@ -124,9 +124,9 @@ public class JwtTokenProvider {
         Key key = cryptoStrategy.getVerifyingKey(publicKeyStr);
 
         return Jwts.parserBuilder()
-            .setSigningKey(key)
-            .build()
-            .parseClaimsJws(token)
-            .getBody();
-    } 
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
 }

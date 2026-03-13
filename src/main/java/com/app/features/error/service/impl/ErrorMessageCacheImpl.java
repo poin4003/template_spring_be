@@ -9,12 +9,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.app.core.constant.AppConstants;
 import com.app.core.sync.SyncableDataService;
-import com.app.features.error.entity.SystemErrorDefinationEntity;
+import com.app.features.error.entity.SystemErrorDefinitionEntity;
 import com.app.features.error.entity.SystemErrorMessageEntity;
-import com.app.features.error.repository.SystemErrorDefinationRepository;
+import com.app.features.error.repository.SystemErrorDefinitionRepository;
 import com.app.features.error.repository.SystemErrorMessageRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ErrorMessageCacheImpl implements SyncableDataService {
 
-    private final SystemErrorDefinationRepository errorRepo;
+    private final SystemErrorDefinitionRepository errorRepo;
     private final SystemErrorMessageRepository errorMessageRepo;
 
     private final Map<Integer, Map<String, String>> cache = new ConcurrentHashMap<>();
@@ -49,10 +48,7 @@ public class ErrorMessageCacheImpl implements SyncableDataService {
         try {
             log.info("[Cache] Start refreshing error message...");
 
-            List<SystemErrorDefinationEntity> definations = errorRepo.selectList(
-                new LambdaQueryWrapper<SystemErrorDefinationEntity>()
-                    .select(SystemErrorDefinationEntity::getErrorId, SystemErrorDefinationEntity::getErrorCode)
-            );
+            List<SystemErrorDefinitionEntity> definations = errorRepo.findAll();
 
             if (definations.isEmpty()) {
                 log.warn("[Cache] No error definations found.");
@@ -60,24 +56,21 @@ public class ErrorMessageCacheImpl implements SyncableDataService {
             }
 
             Map<UUID, Integer> definationIdToCodeMap = definations.stream()
-                .collect(Collectors.toMap(
-                    SystemErrorDefinationEntity::getErrorId,
-                    SystemErrorDefinationEntity::getErrorCode
-                ));
+                    .collect(Collectors.toMap(
+                            SystemErrorDefinitionEntity::getId,
+                            SystemErrorDefinitionEntity::getCode));
 
-            List<SystemErrorMessageEntity> messages = errorMessageRepo.selectList(
-                new LambdaQueryWrapper<SystemErrorMessageEntity>()
-                    .in(SystemErrorMessageEntity::getErrorDefinationId, definationIdToCodeMap.keySet())
-            );
+            List<SystemErrorMessageEntity> messages = errorMessageRepo
+                    .findByErrorDefinitionIdIn(definationIdToCodeMap.keySet());
 
             Map<Integer, Map<String, String>> newCache = new HashMap<>();
 
             for (SystemErrorMessageEntity msg : messages) {
-                Integer errorCode = definationIdToCodeMap.get(msg.getErrorDefinationId());
+                Integer errorCode = definationIdToCodeMap.get(msg.getId());
 
                 if (errorCode != null) {
                     newCache.computeIfAbsent(errorCode, k -> new HashMap<>())
-                        .put(msg.getLanguageCode(), msg.getMessageContent());
+                            .put(msg.getLanguageCode(), msg.getContent());
                 }
             }
 
@@ -94,12 +87,13 @@ public class ErrorMessageCacheImpl implements SyncableDataService {
     public String getMessage(Integer code) {
         Map<String, String> langMap = cache.get(code);
 
-        if (langMap == null) return null;
+        if (langMap == null)
+            return null;
 
         String content = langMap.get(AppConstants.SYSTEM_LANGUAGE);
 
         if (content == null) {
-             content = langMap.get("en");
+            content = langMap.get("en");
         }
 
         return content;

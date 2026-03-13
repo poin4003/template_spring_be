@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.app.core.security.KeyStoreResult;
+import com.app.core.security.UserPrincipal;
 import com.app.features.auth.service.KeyStoreService;
-import com.app.features.auth.service.schema.result.KeyStoreResult;
-import com.app.features.auth.service.schema.result.UserPrincipal;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;

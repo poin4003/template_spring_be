@@ -10,18 +10,17 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.app.core.response.ResultCode;
 import com.app.features.action.executor.ActionExecutorFactory;
 import com.app.features.action.executor.context.MqActionContext;
 import com.app.features.action.service.ActionService;
 import com.app.features.action.service.schema.result.MatchedActionResult;
-import com.app.features.error.entity.SystemErrorDefinationEntity;
+import com.app.features.error.entity.SystemErrorDefinitionEntity;
 import com.app.features.error.enums.ErrorCategoryEnum;
-import com.app.features.error.repository.SystemErrorDefinationRepository;
-import com.app.features.ops.entity.ServiceEndpointConfigEntity;
-import com.app.features.ops.enums.EndpointTypeEnum;
-import com.app.features.ops.repository.ServiceEndpointConfigRepository;
+import com.app.features.error.repository.SystemErrorDefinitionRepository;
+import com.app.features.ops.entity.OpsConfigEntity;
+import com.app.features.ops.enums.OpsTypeEnum;
+import com.app.features.ops.repository.OpsConfigRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,8 +33,8 @@ public class DlqDispatcher {
     private final ActionService actionService;
     private final ActionExecutorFactory actionExecutorFactory;
 
-    private final ServiceEndpointConfigRepository configRepo;
-    private final SystemErrorDefinationRepository errorRepo;
+    private final OpsConfigRepository opsConfigRepo;
+    private final SystemErrorDefinitionRepository errorRepo;
 
     @KafkaListener(topicPattern = ".*\\.DLQ", groupId = "${spring.kafka.consumer.group-id:dlq-dispatcher-group}")
     public void onDeadLetterMessage(ConsumerRecord<?, ?> record) {
@@ -68,7 +67,7 @@ public class DlqDispatcher {
                 return;
             }
 
-            log.info("   -> MATCHED RULE: [{}] - Action Type: [{}]", match.getRuleName(), match.getActionType());
+            log.info("   -> MATCHED RULE: [{}] - Action Type: [{}]", match.getName(), match.getActionType());
 
             MqActionContext context = MqActionContext.builder()
                     .triggerSource("DLQ_LISTENER")
@@ -93,13 +92,9 @@ public class DlqDispatcher {
     }
 
     private UUID lookupTargetIdBySourceName(String sourceName) {
-        ServiceEndpointConfigEntity entity = configRepo.selectOne(
-                new LambdaQueryWrapper<ServiceEndpointConfigEntity>()
-                        .select(ServiceEndpointConfigEntity::getServiceEndpointConfigId)
-                        .eq(ServiceEndpointConfigEntity::getEndpointName, sourceName)
-                        .eq(ServiceEndpointConfigEntity::getEndpointType, EndpointTypeEnum.MQ_BROKER_LISTENER)
-                        .last("LIMIT 1"));
-        return entity != null ? entity.getServiceEndpointConfigId() : null;
+        return opsConfigRepo.findFirstByNameAndType(sourceName, OpsTypeEnum.MQ_BROKER_LISTENER)
+                .map(OpsConfigEntity::getId)
+                .orElse(null);
     }
 
     private Integer lookupErrorCodeByExceptionClass(String exceptionClass) {
@@ -109,13 +104,13 @@ public class DlqDispatcher {
 
         // TODO: Nên dùng @Cacheable ở service layer cho hàm này để không query DB liên
         // tục
-        List<SystemErrorDefinationEntity> errorDefinitions = errorRepo.selectList(null);
+        List<SystemErrorDefinitionEntity> errorDefinitions = errorRepo.findAll();
 
         return errorDefinitions.stream()
                 .filter(def -> def.getExceptionClassName() != null
                         && def.getExceptionClassName().getJava() != null
                         && exceptionClass.equals(def.getExceptionClassName().getJava().getClassName()))
-                .map(SystemErrorDefinationEntity::getErrorCode)
+                .map(SystemErrorDefinitionEntity::getCode)
                 .findFirst()
                 .orElse(ResultCode.ERROR.code());
     }

@@ -14,7 +14,7 @@ public class MatchedActionResult {
 
     private BaseActionConfig actionConfig;
 
-    private String ruleName;
+    private String name;
 
     private Integer priority;
 }

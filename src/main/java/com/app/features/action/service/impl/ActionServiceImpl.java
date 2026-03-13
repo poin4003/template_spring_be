@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ActionServiceImpl implements ActionService {
     
-    private final ActionRepository actionRuleRepo;
+    private final ActionRepository actionRepo;
 
     @Override
     @Cacheable(
@@ -30,16 +30,11 @@ public class ActionServiceImpl implements ActionService {
     public MatchedActionResult findBestMatch(UUID targetId, Integer errorCode, ErrorCategoryEnum category) {
         log.debug("Matching action for Target: {}, Code: {}, Cat: {}", targetId, errorCode, category);
 
-        ActionEntity rule = actionRuleRepo.findMatchedAction(targetId, errorCode, category);
-
-        if (rule == null) {
-            return null;
-        }
+        ActionEntity rule = actionRepo.findTopMatchedAction(targetId, errorCode, category).orElse(null);
 
         return MatchedActionResult.builder()
-            .ruleName(rule.getActionName())
+            .name(rule.getName())
             .actionType(rule.getActionType())
-            .actionConfig(rule.getActionConfig())
             .priority(rule.getPriority())
             .build();
     }

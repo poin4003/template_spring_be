@@ -2,7 +2,7 @@ package com.app.features.auth.service;
 
 import java.util.UUID;
 
-import com.app.features.auth.service.schema.result.KeyStoreResult;
+import com.app.core.security.KeyStoreResult;
 
 public interface KeyStoreService {
 

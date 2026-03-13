@@ -1,14 +1,14 @@
 package com.app.features.ops.service.impl;
 
-import java.time.Instant;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ScheduledFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.concurrent.ScheduledFuture;
-import java.util.Objects;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.app.core.cache.RedisService;
 import com.app.features.ops.entity.CronJobConfigEntity;
-import com.app.features.ops.enums.EndpointStatusEnum;
+import com.app.features.ops.enums.OpsStatusEnum;
 import com.app.features.ops.repository.CronJobConfigRepository;
 import com.app.features.ops.scheduler.JobHandler;
 import com.app.features.ops.service.CronJobService;
@@ -39,7 +39,7 @@ public class CronJobServiceImpl implements CronJobService {
 
     private final RedisService redisService;
     private static final String CRON_STATUS_PREFIX = "ops:cronjob:status";
-    
+
     public CronJobServiceImpl(
             TaskScheduler taskScheduler,
             LockingTaskExecutor lockingTaskExecutor,
@@ -60,7 +60,7 @@ public class CronJobServiceImpl implements CronJobService {
     public void refreshJobs() {
         log.info("Refreshing dynamic jobs from Database...");
 
-        List<CronJobConfigEntity> configs = jobConfigRepo.findAllActiveJobs(EndpointStatusEnum.ACTIVE);
+        List<CronJobConfigEntity> configs = jobConfigRepo.findAllActiveJobs(OpsStatusEnum.ACTIVE);
 
         scheduledTasks.forEach((k, v) -> {
             v.cancel(false);
@@ -77,7 +77,7 @@ public class CronJobServiceImpl implements CronJobService {
 
     private void scheduleSingleJob(CronJobConfigEntity config) {
         try {
-            String jobName = config.getCronjobName();
+            String jobName = config.getName();
 
             if (!isJobEnabled(jobName)) {
                 log.warn("Job [{}] is DISABLED in Redis. Skipping.", jobName);
@@ -109,14 +109,14 @@ public class CronJobServiceImpl implements CronJobService {
             ScheduledFuture<?> future = taskScheduler.schedule(
                     lockableTask,
                     new CronTrigger(
-                            Objects.requireNonNull(config.getCronExpression(), "Cronjob Express must not be null")));
+                            Objects.requireNonNull(config.getExpression(), "Cronjob Express must not be null")));
 
             scheduledTasks.put(jobName, future);
-            log.info("Scheduled job [{}] - cron [{}] - type [{}]", jobName, config.getCronExpression(),
+            log.info("Scheduled job [{}] - cron [{}] - type [{}]", jobName, config.getExpression(),
                     config.getJobType());
 
         } catch (Exception e) {
-            log.error("Failed to schedule job: " + config.getCronjobName(), e);
+            log.error("Failed to schedule job: " + config.getName(), e);
         }
     }
 

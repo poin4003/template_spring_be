@@ -10,5 +10,7 @@ import com.app.features.user.entity.UserBaseEntity;
 
 @Repository
 public interface UserBaseRepository extends JpaRepository<UserBaseEntity, UUID> {
+    boolean existsByEmail(String email);
+
     Optional<UserBaseEntity> findByEmail(String email);
 }

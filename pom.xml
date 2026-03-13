@@ -193,6 +193,13 @@
             <version>5.10.0</version>
         </dependency>
 
+        <!-- PipelineR / CQRS -->
+        <dependency>
+            <groupId>net.sizovs</groupId>
+            <artifactId>pipelinr</artifactId>
+            <version>0.8</version>
+        </dependency>
+
     </dependencies>
 
     <build>

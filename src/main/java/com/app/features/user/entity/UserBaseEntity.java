@@ -35,7 +35,7 @@ public class UserBaseEntity extends BaseUserDetailEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID userId;
+    private UUID id;
 
     @Column(unique = true, nullable = false)
     private String email;

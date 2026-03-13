@@ -2,30 +2,24 @@ package com.app.features.sims.service.impl;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.excel.EasyExcel;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.app.core.dto.PaginationResponse;
-import com.app.core.exception.ExceptionFactory;
 import com.app.features.sims.entity.SimEntity;
 import com.app.features.sims.excel.SimImportExcelListener;
+import com.app.features.sims.excel.dto.SimExcelExport;
+import com.app.features.sims.excel.dto.SimExcelImport;
+import com.app.features.sims.filter.SimFilterCriteria;
 import com.app.features.sims.producer.SimImportProducer;
 import com.app.features.sims.repository.SimRepsitory;
+import com.app.features.sims.repository.spec.SimSpecifications;
 import com.app.features.sims.service.SimService;
-import com.app.features.sims.service.schema.SimCoreMapStruct;
-import com.app.features.sims.service.schema.command.SimCmd;
-import com.app.features.sims.service.schema.command.SimExcelImportCmd;
-import com.app.features.sims.service.schema.query.SimFilterQuery;
-import com.app.features.sims.service.schema.result.SimExcelExportResult;
-import com.app.features.sims.service.schema.result.SimResult;
 import com.app.utils.TaskRunnerUtils;
 import com.app.utils.ThreadPoolUtils;
 
@@ -35,42 +29,24 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class SimServiceImpl implements SimService{
+public class SimServiceImpl implements SimService {
+
     private final SimRepsitory simRepo;
-    private final SimCoreMapStruct simCoreMapStruct;
     private final SimImportProducer simImportProducer;
-
-    @Override
-    public SimResult createSim(SimCmd cmd) {
-        SimEntity exist = simRepo.selectOne(
-            new QueryWrapper<SimEntity>().eq("sim_phone_number", cmd.getSimPhoneNumber())
-        );
-
-        if (exist != null) { 
-            throw ExceptionFactory.dataAlreadyExists("PhoneNumber " + cmd.getSimPhoneNumber());
-        }
-
-        SimEntity simEntity = simCoreMapStruct.commandToEntity(cmd);
-        simEntity.setSimId(UUID.randomUUID());
-
-        simRepo.insert(simEntity);
-
-        return simCoreMapStruct.toResult(simEntity);
-    }
+    private final ModelMapper modelMapper;
 
     @Override
     public void importSimsFromExcel(MultipartFile file) throws IOException {
-        SimImportExcelListener listener = new SimImportExcelListener(simImportProducer, simCoreMapStruct);
+        SimImportExcelListener listener = new SimImportExcelListener(simImportProducer, modelMapper);
 
         log.info("Starting to read Excel file: {}", file.getOriginalFilename());
 
         try {
             EasyExcel.read(
-                file.getInputStream(),
-                SimExcelImportCmd.class,
-                listener
-            ).sheet().doRead();
-            
+                    file.getInputStream(),
+                    SimExcelImport.class,
+                    listener).sheet().doRead();
+
         } catch (IOException e) {
             log.error("Error reading input stream for Excel file: {}", e.getMessage());
             throw e;
@@ -78,42 +54,14 @@ public class SimServiceImpl implements SimService{
     }
 
     @Override
-    public SimResult getSimById(UUID id) {
-        SimEntity simEntity = simRepo.selectById(id);
+    public List<SimExcelExport> getAllSimExcelExport(SimFilterCriteria criteria) {
+        Specification<SimEntity> spec = SimSpecifications.withFilter(criteria);
 
-        if (simEntity == null) { 
-            log.error("Service:-> getSimById | {}", id);
-            throw ExceptionFactory.dataNotFound("Sim ID " + id);
-        }
+        List<SimEntity> allSimEntities = simRepo.findAll(spec);
 
-        return simCoreMapStruct.toResult(simEntity);
-    }
-
-    @Override
-    public PaginationResponse<SimResult> getManySim(SimFilterQuery queryInput) {
-        IPage<SimEntity> pageObject = new Page<>(queryInput.getCurrentPage(), queryInput.getPageSize());
-
-        IPage<SimEntity> entityPage = simRepo.selectPage(pageObject, null);
-
-        List<SimResult> responseList = entityPage.getRecords().stream()
-                    .map(simCoreMapStruct::toResult)
-                    .collect(Collectors.toList());
-
-        return PaginationResponse.of(
-            responseList,
-            entityPage.getTotal(),
-            entityPage.getCurrent(),
-            entityPage.getSize()
-        );
-    }
-
-    @Override
-    public List<SimExcelExportResult> getAllSimExcelExport() {
-        List<SimEntity> allSimEntities = simRepo.selectList(null);
-
-        List<SimExcelExportResult> allSimResponses = allSimEntities.stream()
-                    .map(simCoreMapStruct::toExcelResult)
-                    .collect(Collectors.toList());
+        List<SimExcelExport> allSimResponses = allSimEntities.stream()
+                .map(entity -> modelMapper.map(entity, SimExcelExport.class))
+                .collect(Collectors.toList());
 
         return allSimResponses;
     }
@@ -126,14 +74,14 @@ public class SimServiceImpl implements SimService{
         int ccuPoolRate = 3;
         int threadLoop = chunkLoop / ccuPoolRate + (chunkLoop % ccuPoolRate == 0 ? 0 : 1);
 
-        ThreadPoolTaskExecutor threadPoolTaskExecutor = ThreadPoolUtils.createThreadPoolTaskExecutor(9, 12, threadLoop * ccuPoolRate, 60, "thread-excel-");
-        
+        ThreadPoolTaskExecutor threadPoolTaskExecutor = ThreadPoolUtils.createThreadPoolTaskExecutor(9, 12,
+                threadLoop * ccuPoolRate, 60, "thread-excel-");
+
         try {
-            TaskRunnerUtils.runInParallelBatches(totalCount, ccuPoolRate, threadLoop, threadPoolTaskExecutor, 
-                (startRows, endRows) -> {
-                    System.out.println("Processing: startRows " + startRows + " | endRows " + endRows);
-                }
-            );
+            TaskRunnerUtils.runInParallelBatches(totalCount, ccuPoolRate, threadLoop, threadPoolTaskExecutor,
+                    (startRows, endRows) -> {
+                        System.out.println("Processing: startRows " + startRows + " | endRows " + endRows);
+                    });
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } finally {
