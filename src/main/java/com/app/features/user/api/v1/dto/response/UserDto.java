@@ -1,0 +1,19 @@
+package com.app.features.user.api.v1.dto.response;
+
+import java.util.UUID;
+
+import lombok.Data;
+
+@Data
+public class UserDto {
+
+    private UUID userId;
+
+    private String userEmail;
+
+    private String userStatus;
+
+    private String createdAt;
+
+    private String updatedAt;
+}

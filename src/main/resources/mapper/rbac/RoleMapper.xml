@@ -3,13 +3,13 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.template.app.features.rbac.repository.RoleRepository">
+<mapper namespace="com.app.features.rbac.repository.RoleRepository">
 
-    <resultMap id="RoleWithPermissionsMap" type="com.template.app.features.rbac.entity.RoleEntity">
+    <resultMap id="RoleWithPermissionsMap" type="com.app.features.rbac.entity.RoleEntity">
         <id property="roleId" column="role_id"/>
         <collection property="permissions" 
-                    ofType="com.template.app.features.rbac.entity.PermissionEntity"
-                    select="com.template.app.features.rbac.repository.PermissionRepository.selectPermissionByRoleId" 
+                    ofType="com.app.features.rbac.entity.PermissionEntity"
+                    select="com.app.features.rbac.repository.PermissionRepository.selectPermissionByRoleId" 
                     column="role_id"/>
     </resultMap>
 
