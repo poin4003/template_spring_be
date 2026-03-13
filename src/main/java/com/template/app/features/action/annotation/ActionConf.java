@@ -13,7 +13,7 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface ActionConf {
-    
+
     ActionTypeEnum value();
 
     String name() default "";
