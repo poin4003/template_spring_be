@@ -39,7 +39,7 @@ class RefreshTokenHanlder implements Command.Handler<RefreshTokenCmd, LoginResul
 
     @Override
     public LoginResult handle(RefreshTokenCmd cmd) {
-        ConsumedRefreshTokenEntity usedToken = consumedRefreshTokenRepo.findByRefreshToken(cmd.refreshToken())
+        ConsumedRefreshTokenEntity usedToken = consumedRefreshTokenRepo.findByTokenValue(cmd.refreshToken())
                 .orElse(null);
 
         if (usedToken != null) {

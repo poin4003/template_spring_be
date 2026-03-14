@@ -10,6 +10,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,7 @@ import com.app.features.ops.repository.CronJobConfigRepository;
 import com.app.features.ops.scheduler.JobHandler;
 import com.app.features.ops.service.CronJobService;
 
-import jakarta.annotation.PostConstruct;
+// import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
@@ -55,7 +57,7 @@ public class CronJobServiceImpl implements CronJobService {
                 .collect(Collectors.toMap(JobHandler::getSupportedJobType, Function.identity()));
     }
 
-    @PostConstruct
+    // @PostConstruct
     @Override
     public void refreshJobs() {
         log.info("Refreshing dynamic jobs from Database...");
@@ -135,5 +137,11 @@ public class CronJobServiceImpl implements CronJobService {
         log.info("Manual OP: set cronjob '{}' status to {}", jobName, enabled);
 
         refreshJobs();
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void onApplicationReady() {
+        log.info("System is ready. Starting initial cronjob refresh...");
+        this.refreshJobs();
     }
 }

@@ -52,6 +52,6 @@ public class AuthServiceImpl implements AuthService {
         keyStore.setPrivateKey(privateKey);
         keyStore.setRefreshToken(refreshToken);
 
-        keyStoreRepo.upsert(keyStore);
+        keyStoreRepo.save(keyStore);
     }
 }

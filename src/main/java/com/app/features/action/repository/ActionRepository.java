@@ -18,18 +18,15 @@ import io.lettuce.core.dynamic.annotation.Param;
 @Repository
 public interface ActionRepository extends JpaRepository<ActionEntity, UUID> {
 
-    @Query("""
-                SELECT a FROM ActionEntity a
-                JOIN a.errors e
-                WHERE a.status = com.app.features.action.enums.ActionStatusEnum.ACTIVE
-                  AND (a.targetId = :targetId OR a.targetType = com.app.features.action.enums.TargetTypeEnum.ALL)
-                  AND e.code = :errorCode
-                  AND e.category = :category
-                ORDER BY a.priority DESC, a.targetType DESC
-            """)
+    @Query(value = """
+            SELECT * FROM actions
+            WHERE user_id = :userId
+            AND some_count_column = :count
+            AND category = :#{#category.code}
+            """, nativeQuery = true)
     List<ActionEntity> findMatchedActionsLimit(
-            @Param("targetId") UUID targetId,
-            @Param("errorCode") Integer errorCode,
+            @Param("userId") UUID userId,
+            @Param("count") Integer count,
             @Param("category") ErrorCategoryEnum category,
             Pageable pageable);
 

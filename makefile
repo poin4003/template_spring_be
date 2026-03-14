@@ -13,21 +13,9 @@ run:
 	$(MVN_CMD) spring-boot:run
 
 # Migration command
-flyway_migrate:
-	@echo "Running Flyway migration..."
-	$(MVN_CMD) flyway:migrate "-Dflyway.url=$(DB_URL)" "-Dflyway.user=$(DB_USER)" "-Dflyway.password=$(DB_PASSWORD)"
-
-flyway_info:
-	@echo "Checking migration status..."
-	$(MVN_CMD) flyway:info "-Dflyway.url=$(DB_URL)" "-Dflyway.user=$(DB_USER)" "-Dflyway.password=$(DB_PASSWORD)"
-
-flyway_validate:
-	@echo "Validating migrations..."
-	$(MVN_CMD) flyway:validate "-Dflyway.url=$(DB_URL)" "-Dflyway.user=$(DB_USER)" "-Dflyway.password=$(DB_PASSWORD)"
-
-flyway_repair:
-	@echo "Repairing schema history..."
-	$(MVN_CMD) flyway:repair "-Dflyway.url=$(DB_URL)" "-Dflyway.user=$(DB_USER)" "-Dflyway.password=$(DB_PASSWORD)"
+db_generate:
+	@echo "Generating schema from current DB..."
+	$(MVN_CMD) liquibase:generateChangeLog -Dliquibase.url="$(DB_URL)" -Dliquibase.username="$(DB_USER)" -Dliquibase.password="$(DB_PASSWORD)" -Dliquibase.outputChangeLogFile="src/main/resources/db/changelog/01-init-schema.sql"
 
 # docker compose -f docker-compose-broker-kafka.yaml --project-name kafka  up -d
 # docker exec kafka1 kafka-topics.sh --describe --topic import-sim-topic --bootstrap-server localhost:9092

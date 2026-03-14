@@ -11,8 +11,6 @@ import com.app.features.auth.entity.KeyStoreEntity;
 
 @Repository
 public interface KeyStoreRepository extends JpaRepository<KeyStoreEntity, UUID> {
-    void upsert(KeyStoreEntity entity);
-
     Optional<KeyStoreEntity> findByUserId(UUID userId);
 
     @Modifying

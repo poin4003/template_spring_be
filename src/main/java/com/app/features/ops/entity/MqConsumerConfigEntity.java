@@ -3,6 +3,9 @@ package com.app.features.ops.entity;
 import java.util.Map;
 import java.util.UUID;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.app.base.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -41,6 +44,7 @@ public class MqConsumerConfigEntity extends BaseEntity {
     @Column(name = "handler_key")
     private String handlerKey;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "config_data")
     private Map<String, Object> configData;
 

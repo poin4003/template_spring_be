@@ -20,5 +20,5 @@ public interface ConsumedRefreshTokenRepository extends JpaRepository<ConsumedRe
     @Query("DELETE FROM ConsumedRefreshTokenEntity c WHERE c.expiryDate < :now")
     int deleteAllExpiredSince(@Param("now") Instant now);
 
-    Optional<ConsumedRefreshTokenEntity> findByRefreshToken(String refreshToken);
+    Optional<ConsumedRefreshTokenEntity> findByTokenValue(String refreshToken);
 }
