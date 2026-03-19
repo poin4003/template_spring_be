@@ -1,6 +1,7 @@
 package com.app.features.auth.cqrs.command;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -8,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import com.app.core.exception.ExceptionFactory;
 import com.app.core.security.UserPrincipal;
 import com.app.features.auth.cqrs.result.LoginResult;
 import com.app.features.auth.service.AuthService;
@@ -39,15 +41,18 @@ class LoginHandler implements Command.Handler<LoginCmd, LoginResult> {
         UserPrincipal userDetails = (UserPrincipal) authentication.getPrincipal();
         UUID userId = userDetails.getUserId();
         String userEmail = userDetails.getEmail();
+        
+        String email = Objects.requireNonNull(cmd.email(), "Email must be not null");
 
-        updateUserLoginInfo(userId, cmd.ipAddress());
+        UserBaseEntity user = userBaseRepo.findByEmail(email)
+                .orElseThrow(() -> ExceptionFactory.dataNotFound("User: " + userId));
+
+        updateUserLoginInfo(user, cmd.ipAddress());
 
         return authService.generateAndSaveTokens(userId, userEmail);
     }
 
-    private void updateUserLoginInfo(UUID userId, String ipAddress) {
-        UserBaseEntity user = new UserBaseEntity();
-        user.setId(userId);
+    private void updateUserLoginInfo(UserBaseEntity user, String ipAddress) {
         user.setLoginTime(LocalDateTime.now());
         user.setLoginIp(ipAddress);
 

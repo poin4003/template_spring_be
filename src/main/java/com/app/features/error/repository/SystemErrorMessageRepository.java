@@ -12,4 +12,6 @@ import com.app.features.error.entity.SystemErrorMessageEntity;
 @Repository
 public interface SystemErrorMessageRepository extends JpaRepository<SystemErrorMessageEntity, UUID> {
     List<SystemErrorMessageEntity> findByErrorDefinitionIdIn(Collection<UUID> ids);
+
+    boolean existsByErrorDefinitionIdAndLanguageCode(UUID errorId, String language);
 }

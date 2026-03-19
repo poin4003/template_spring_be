@@ -13,18 +13,19 @@ import io.lettuce.core.dynamic.annotation.Param;
 
 @Repository
 public interface PermissionRepository extends JpaRepository<PermissionEntity, UUID> {
-    @Query(value = """
-            SELECT DISTINCT p.* FROM permissions p
-            INNER JOIN role_permissions rp ON p.permission_id = rp.permission_id
-            INNER JOIN user_roles ur ON rp.role_id = ur.role_id
-            WHERE ur.user_id = :userId
-            """, nativeQuery = true)
-    List<PermissionEntity> findByUserId(@Param("userId") UUID userId);
 
-    @Query(value = """
-            SELECT p.* FROM permissions p
-            INNER JOIN role_permissions rp ON p.permission_id = rp.permission_id
-            WHERE rp.role_id = :roleId
-            """, nativeQuery = true)
-    List<PermissionEntity> findByRoleId(@Param("roleId") UUID roleId);
+        @Query(value = """
+                        SELECT p.* FROM permission p
+                        INNER JOIN role_permissions rp ON p.id = rp.permission_id
+                        WHERE rp.role_id = :roleId
+                        """, nativeQuery = true)
+        List<PermissionEntity> findByRoleId(@Param("roleId") UUID roleId);
+
+        @Query(value = """
+                        SELECT DISTINCT p.* FROM permission p
+                        INNER JOIN role_permissions rp ON p.id = rp.permission_id
+                        INNER JOIN user_roles ur ON rp.role_id = ur.role_id
+                        WHERE ur.user_id = :userId
+                        """, nativeQuery = true)
+        List<PermissionEntity> findByUserId(@Param("userId") UUID userId);
 }

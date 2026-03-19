@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
+import com.app.core.exception.ExceptionFactory;
 import com.app.features.auth.repository.KeyStoreRepository;
 import com.app.features.user.entity.UserBaseEntity;
 import com.app.features.user.repository.UserBaseRepository;
@@ -14,9 +15,9 @@ import an.awesome.pipelinr.Command;
 import lombok.RequiredArgsConstructor;
 
 public record LogoutCmd(
-    UUID keyStoreId,
-    UUID userId
-) implements Command<Void> {}
+        UUID keyStoreId,
+        UUID userId) implements Command<Void> {
+}
 
 @Component
 @RequiredArgsConstructor
@@ -28,17 +29,19 @@ class LogoutHandler implements Command.Handler<LogoutCmd, Void> {
     @Override
     public Void handle(LogoutCmd cmd) {
         UUID keyStoreId = Objects.requireNonNull(cmd.keyStoreId(), "Key store id must be not null");
+        UUID userId = Objects.requireNonNull(cmd.userId(), "User id must be not null");
 
-        updateLogoutInfo(cmd.userId());
+        UserBaseEntity user = userBaseRepo.findById(userId)
+            .orElseThrow(() -> ExceptionFactory.dataNotFound("User: " + cmd.userId()));
+
+        updateLogoutInfo(user);
 
         keyStoreRepo.deleteById(keyStoreId);
 
         return null;
     }
 
-    private void updateLogoutInfo(UUID userId) {
-        UserBaseEntity user = new UserBaseEntity();
-        user.setId(userId);
+    private void updateLogoutInfo(UserBaseEntity user) {
         user.setLogoutTime(LocalDateTime.now());
 
         userBaseRepo.save(user);

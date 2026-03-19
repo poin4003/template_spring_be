@@ -1,8 +1,8 @@
 package com.app.features.ops.service.impl;
 
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -52,11 +52,11 @@ public class CronJobSyncServiceImpl implements SyncableDataService {
 
         List<CronJobConfigEntity> existingJobs = cronJobRepo.findAll();
 
-        Set<String> existingJobTypes = existingJobs.stream()
-                .map(CronJobConfigEntity::getJobType)
-                .collect(Collectors.toSet());
+        Map<String, CronJobConfigEntity> existingJobMap = existingJobs.stream()
+                .collect(Collectors.toMap(CronJobConfigEntity::getJobType, Function.identity()));
 
         int insertCount = 0;
+        int updateCount = 0;
 
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(new AnnotationTypeFilter(CronJobDef.class));
@@ -74,43 +74,53 @@ public class CronJobSyncServiceImpl implements SyncableDataService {
                 JobHandler handler = (JobHandler) applicationContext.getBean(clazz);
                 String jobType = handler.getSupportedJobType();
 
-                if (existingJobTypes.contains(jobType)) {
-                    log.debug("[Sync] JobType [{}] already exists in DB. Skipping.");
-                    continue;
+                if (existingJobMap.containsKey(jobType)) {
+                    CronJobConfigEntity existingCron = existingJobMap.get(jobType);
+                    boolean isChanged = false;
+
+                    if (!existingCron.getExpression().equals(def.cronExpression())) {
+                        existingCron.setExpression(def.cronExpression());
+                        isChanged = true;
+                    }
+                    if (!existingCron.getLockAtLeastFor().equals(def.lockAtLeastFor())) {
+                        existingCron.setLockAtLeastFor(def.lockAtLeastFor());
+                        isChanged = true;
+                    }
+                    if (!existingCron.getLockAtMostFor().equals(def.lockAtMostFor())) {
+                        existingCron.setLockAtMostFor(def.lockAtMostFor());
+                        isChanged = true;
+                    }
+
+                    if (isChanged) {
+                        updateCount++;
+                        log.debug("[Sync] Updated definition for job: [{}]", jobType);
+                    }
+                } else {
+                    OpsConfigEntity opsConfig = new OpsConfigEntity();
+                    opsConfig.setName(def.jobName().toLowerCase().replace(" ", "-"));
+                    opsConfig.setType(OpsTypeEnum.CRONJOB);
+                    opsConfig.setStatus(OpsStatusEnum.ACTIVE);
+
+                    opsConfigRepo.save(opsConfig);
+
+                    CronJobConfigEntity cronConfig = new CronJobConfigEntity();
+                    cronConfig.setOpsConfigEntity(opsConfig);
+                    cronConfig.setName(def.jobName());
+                    cronConfig.setExpression(def.cronExpression());
+                    cronConfig.setJobType(jobType);
+                    cronConfig.setLockAtLeastFor(def.lockAtLeastFor());
+                    cronConfig.setLockAtMostFor(def.lockAtMostFor());
+
+                    cronJobRepo.save(cronConfig);
+
+                    log.info("[Sync] Seeded new Cronjob: [{}] with cron: [{}]", jobType, def.cronExpression());
+                    insertCount++;
                 }
-
-                UUID newId = UUID.randomUUID();
-
-                OpsConfigEntity opsConfig = new OpsConfigEntity();
-                opsConfig.setId(newId);
-                opsConfig.setName(def.jobName().toLowerCase().replace(" ", "-"));
-
-                opsConfig.setType(OpsTypeEnum.CRONJOB);
-                opsConfig.setStatus(OpsStatusEnum.ACTIVE);
-                opsConfigRepo.save(opsConfig);
-
-                CronJobConfigEntity cronConfig = new CronJobConfigEntity();
-                cronConfig.setId(newId);
-                cronConfig.setName(def.jobName());
-                cronConfig.setExpression(def.cronExpression());
-                cronConfig.setJobType(jobType);
-                cronConfig.setLockAtLeastFor(def.lockAtLeastFor());
-                cronConfig.setLockAtMostFor(def.lockAtMostFor());
-                cronJobRepo.save(cronConfig);
-
-                log.info("[Sync] Seeded new CronJob: [{}] with cron: [{}]", jobType, def.cronExpression());
-                insertCount++;
-            } catch (ClassNotFoundException e) {
-                log.error("[Sync] Failed to load CronJob class: {}", bd.getBeanClassName(), e);
             } catch (Exception e) {
                 log.error("[Sync] Error processing bean definition: {}", bd.getBeanClassName(), e);
             }
         }
 
-        if (insertCount > 0) {
-            log.info("[Sync] Successfully seeded {} new CronJobs.", insertCount);
-        } else {
-            log.info("[Sync] No new Cronjobs to seed. Database is up to date.");
-        }
+        log.info(">>> Sync [{}] COMPLETE. Inserted: {}, updated: {}", getSyncType(), insertCount, updateCount);
     }
 }

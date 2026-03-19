@@ -1,8 +1,9 @@
 package com.app.features.auth.service.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,20 +22,30 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserDetailServiceImpl implements UserDetailsService {
 
-    private final UserBaseRepository userBaseRepo; 
+    private final UserBaseRepository userBaseRepo;
     private final RoleRepository roleRepo;
-    private final ModelMapper modelMapper;
 
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // 1. Get user info
         UserBaseEntity user = userBaseRepo.findByEmail(username)
-            .orElseThrow(() -> new UsernameNotFoundException("Not found" + username));
+                .orElseThrow(() -> new UsernameNotFoundException("Not found" + username));
 
-        List<RoleEntity> roles = roleRepo.findByUserId(user.getId()); 
-        user.setRoles(roles);
+        // 2. Get roles
+        List<RoleEntity> roles = roleRepo.findByUserId(user.getId());
 
-        return modelMapper.map(user, UserPrincipal.class);
+        List<SimpleGrantedAuthority> authorities = roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getKey()))
+                .collect(Collectors.toList());
+
+        return UserPrincipal.builder()
+                .userId(user.getId())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .status(user.getStatus())
+                .delFlag(user.getDelFlag())
+                .authorities(authorities)
+                .build();
     }
 }

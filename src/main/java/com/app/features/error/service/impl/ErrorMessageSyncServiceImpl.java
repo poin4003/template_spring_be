@@ -1,7 +1,6 @@
 package com.app.features.error.service.impl;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,12 +47,12 @@ public class ErrorMessageSyncServiceImpl implements SyncableDataService {
 
             SystemErrorDefinitionEntity errorDef = def.get();
 
-            if (!errorRepo.existsByCode(enumCode.code())) {
+            boolean hasMessage = errorMessageRepo.existsByErrorDefinitionIdAndLanguageCode(errorDef.getId(), defaultLang);
+
+            if (!hasMessage) {
                 SystemErrorMessageEntity msg = new SystemErrorMessageEntity();
 
-                UUID msg_id = UUID.randomUUID();
-                msg.setId(msg_id);
-                msg.setId(errorDef.getId());
+                msg.setErrorDefinition(errorDef);
                 msg.setLanguageCode(defaultLang);
                 msg.setContent(enumCode.message());
 

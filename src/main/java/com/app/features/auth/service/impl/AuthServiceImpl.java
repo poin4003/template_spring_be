@@ -1,5 +1,6 @@
 package com.app.features.auth.service.impl;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -44,14 +45,22 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private void saveKeyStore(UUID userId, String publicKey, String privateKey, String refreshToken) {
-        KeyStoreEntity keyStore = new KeyStoreEntity();
+        Optional<KeyStoreEntity> existingOpt = keyStoreRepo.findByUserId(userId);
 
-        keyStore.setId(UUID.randomUUID());
-        keyStore.setUserId(userId);
-        keyStore.setPublicKey(publicKey);
-        keyStore.setPrivateKey(privateKey);
-        keyStore.setRefreshToken(refreshToken);
+        if (existingOpt.isPresent()) {
+            KeyStoreEntity existing = existingOpt.get();
+            existing.setPublicKey(publicKey);
+            existing.setPrivateKey(privateKey);
+            existing.setRefreshToken(refreshToken);
+            keyStoreRepo.save(existing);
+        } else {
+            KeyStoreEntity keyStore = new KeyStoreEntity();
+            keyStore.setUserId(userId);
+            keyStore.setPublicKey(publicKey);
+            keyStore.setPrivateKey(privateKey);
+            keyStore.setRefreshToken(refreshToken);
 
-        keyStoreRepo.save(keyStore);
+            keyStoreRepo.save(keyStore);
+        }
     }
 }
