@@ -5,11 +5,9 @@ import java.util.UUID;
 
 import com.app.features.sims.enums.SimStatusEnum;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
 public class SimResult {
     private UUID id;
 

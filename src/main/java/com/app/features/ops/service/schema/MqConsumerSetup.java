@@ -3,11 +3,9 @@ package com.app.features.ops.service.schema;
 import java.util.Map;
 import java.util.UUID;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
 public class MqConsumerSetup {
 
     private UUID endpointId;

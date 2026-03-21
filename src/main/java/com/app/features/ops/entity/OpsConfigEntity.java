@@ -2,7 +2,7 @@ package com.app.features.ops.entity;
 
 import java.util.UUID;
 
-import com.app.base.BaseEntity;
+import com.app.core.base.BaseEntity;
 import com.app.features.ops.enums.OpsStatusEnum;
 import com.app.features.ops.enums.OpsTypeEnum;
 

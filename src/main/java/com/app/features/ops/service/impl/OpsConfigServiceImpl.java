@@ -37,8 +37,7 @@ public class OpsConfigServiceImpl implements OpsConfigService {
     public void initializeActiveEndpoints() {
         log.info("=== [OPS-MANAGER] Starting scan and init endpoints ===");
 
-        List<OpsConfigEntity> activeConfigs = opsConfigRepo.findByTypeAndStatus(
-                null, OpsStatusEnum.ACTIVE);
+        List<OpsConfigEntity> activeConfigs = opsConfigRepo.findByStatus(OpsStatusEnum.ACTIVE);
 
         int successCount = 0;
 
@@ -62,21 +61,23 @@ public class OpsConfigServiceImpl implements OpsConfigService {
                 successCount, activeConfigs.size());
     }
 
-    private boolean processMqEndpoint(OpsConfigEntity config) {
-        UUID configId = Objects.requireNonNull(config.getId(), "Config id must be not null!");
+    private boolean processMqEndpoint(OpsConfigEntity opsConfig) {
+        UUID opsConfigId = Objects.requireNonNull(opsConfig.getId(), "OpsConfig ID must not be null!");
 
-        MqConsumerConfigEntity detail = mqConsumerConfigRepo.findById(configId)
+        MqConsumerConfigEntity mqConfig = mqConsumerConfigRepo.findById(opsConfigId)
                 .orElse(null);
 
-        if (detail == null) {
-            log.warn("Continue config ID: {}: not found detail data in table mq_consumer_details", config.getId());
-
+        if (mqConfig == null) {
+            log.warn("Skipping MQ Setup [{}]: Detail data not found in mq_consumer_details for ID {}",
+                    opsConfig.getName(), opsConfigId);
             return false;
         }
 
-        MqConsumerSetup cmd = modelMapper.map(detail, MqConsumerSetup.class);
+        MqConsumerSetup setup = modelMapper.map(mqConfig, MqConsumerSetup.class);
 
-        mqListenerService.registerMqConsumer(cmd);
+        setup.setEndpointId(opsConfig.getId());
+
+        mqListenerService.registerMqConsumer(setup);
 
         return true;
     }

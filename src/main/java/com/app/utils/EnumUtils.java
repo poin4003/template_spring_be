@@ -3,7 +3,7 @@ package com.app.utils;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.app.base.BaseEnum;
+import com.app.core.base.BaseEnum;
 
 public final class EnumUtils {
     private static final Map<Class<? extends BaseEnum>, Object[]> enumValueCache =

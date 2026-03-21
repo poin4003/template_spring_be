@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import com.app.base.BaseEntity;
+import com.app.core.base.BaseEntity;
 import com.app.features.action.enums.ActionStatusEnum;
 import com.app.features.action.enums.ActionTypeEnum;
 import com.app.features.action.enums.TargetTypeEnum;

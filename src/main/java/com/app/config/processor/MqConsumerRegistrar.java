@@ -54,9 +54,12 @@ public class MqConsumerRegistrar implements BeanFactoryPostProcessor {
                         "RegisterMqConsumer annotation must not be null"
                     );
 
+                String simpleName = clazz.getSimpleName();
+                String beanName = Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1);
+
                 String listenerId =
                     Objects.requireNonNull(
-                        clazz.getSimpleName(),
+                        beanName,
                         "ListenerId must not be null"
                     );
 

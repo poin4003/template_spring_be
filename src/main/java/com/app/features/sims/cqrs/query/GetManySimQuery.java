@@ -1,15 +1,14 @@
 package com.app.features.sims.cqrs.query;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import com.app.base.BaseQuery;
 import com.app.features.sims.cqrs.result.SimResult;
 import com.app.features.sims.entity.SimEntity;
 import com.app.features.sims.enums.SimStatusEnum;
@@ -19,12 +18,10 @@ import com.app.features.sims.repository.spec.SimSpecifications;
 
 import an.awesome.pipelinr.Command;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class GetManySimQuery extends BaseQuery implements Command<Page<SimResult>>, SimFilterCriteria {
+public class GetManySimQuery implements Command<Page<SimResult>>, SimFilterCriteria {
 
     private String phoneNumber;
 
@@ -33,6 +30,8 @@ public class GetManySimQuery extends BaseQuery implements Command<Page<SimResult
     private LocalDateTime fromDate;
 
     private LocalDateTime toDate;
+
+    private Pageable pageable;
 }
 
 @Component
@@ -44,7 +43,7 @@ class GetManySimHandler implements Command.Handler<GetManySimQuery, Page<SimResu
 
     @Override
     public Page<SimResult> handle(GetManySimQuery query) {
-        Pageable pageable = PageRequest.of(query.getCurrentPage() - 1, query.getPageSize());
+        Pageable pageable = Objects.requireNonNull(query.getPageable());
 
         Specification<SimEntity> spec = SimSpecifications.withFilter(query);
 

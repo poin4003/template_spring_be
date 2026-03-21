@@ -2,6 +2,7 @@ package com.app.features.sims.consumer;
 
 import org.springframework.stereotype.Component;
 
+import com.app.core.annotation.RegisterMqConsumer;
 import com.app.core.exception.ExceptionFactory;
 import com.app.core.mq.handler.MessageHandler;
 import com.app.features.sims.cqrs.command.CreateSimCmd;
@@ -11,7 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component("simImportConsumer")
+@Component
+@RegisterMqConsumer(topic = "import-sim-topic", group = "sim-import-group", dlq = true)
 @RequiredArgsConstructor
 public class SimImportConsumer implements MessageHandler<CreateSimCmd> {
 
@@ -24,7 +26,7 @@ public class SimImportConsumer implements MessageHandler<CreateSimCmd> {
             return;
         }
 
-        if ("9999999999".equals(cmd.phoneNumber())) {
+        if ("9999999999".equals(cmd.getPhoneNumber())) {
             log.warn(">>> SIMULATION: Triggering Artificial Error for DLQ Test! <<<");
             throw ExceptionFactory.importSimError();
         }
@@ -34,7 +36,7 @@ public class SimImportConsumer implements MessageHandler<CreateSimCmd> {
         try {
             pipeline.send(cmd);
         } catch (Exception e) {
-            log.error("Error processing SIM import for phone number {}: {}", cmd.phoneNumber(), e.getMessage());
+            log.error("Error processing SIM import for phone number {}: {}", cmd.getPhoneNumber(), e.getMessage());
             throw e;
         }
     }

@@ -1,6 +1,5 @@
 package com.app.features.sims.api.v1.dto.response;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.app.features.sims.enums.SimStatusEnum;
@@ -9,14 +8,14 @@ import lombok.Data;
 
 @Data
 public class SimDto {
-    private UUID simId;
+    private UUID id;
 
-    private String simPhoneNumber;
-    private SimStatusEnum simStatus;
-    private Integer simSellingPrice;
-    private Integer simDealerPrice;
-    private Integer simImportPrice;
+    private String phoneNumber;
+    private SimStatusEnum status;
+    private Integer sellingPrice;
+    private Integer dealerPrice;
+    private Integer importPrice;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 }

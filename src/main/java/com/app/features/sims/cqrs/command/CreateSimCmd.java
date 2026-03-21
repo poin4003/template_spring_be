@@ -11,36 +11,38 @@ import com.app.features.sims.enums.SimStatusEnum;
 import com.app.features.sims.repository.SimRepsitory;
 
 import an.awesome.pipelinr.Command;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+@Data
 @RegisterMqType("CreateSimCmd")
-public record CreateSimCmd(
-        String phoneNumber,
-        Integer importPrice,
-        Integer sellingPrice,
-        Integer dealerPrice,
-        SimStatusEnum status) implements Command<SimResult> {
+public class CreateSimCmd implements Command<SimResult> {
+    private String phoneNumber;
+    private Integer importPrice;
+    private Integer sellingPrice;
+    private Integer dealerPrice;
+    private SimStatusEnum status;
 }
 
 @Component
 @RequiredArgsConstructor
 class CreateSimHandler implements Command.Handler<CreateSimCmd, SimResult> {
 
-    private SimRepsitory simRepo;
-    private ModelMapper modelMapper;
+    private final SimRepsitory simRepo;
+    private final ModelMapper modelMapper;
 
     @Override
     public SimResult handle(CreateSimCmd cmd) {
-        if (simRepo.existsByPhoneNumber(cmd.phoneNumber())) {
-            throw ExceptionFactory.dataAlreadyExists("PhoneNumber " + cmd.phoneNumber());
+        if (simRepo.existsByPhoneNumber(cmd.getPhoneNumber())) {
+            throw ExceptionFactory.dataAlreadyExists("PhoneNumber " + cmd.getPhoneNumber());
         }
 
         SimEntity sim = new SimEntity();
-        sim.setPhoneNumber(cmd.phoneNumber());
-        sim.setImportPrice(cmd.importPrice());
-        sim.setSellingPrice(cmd.sellingPrice());
-        sim.setDealerPrice(cmd.dealerPrice());
-        sim.setStatus(cmd.status());
+        sim.setPhoneNumber(cmd.getPhoneNumber());
+        sim.setImportPrice(cmd.getImportPrice());
+        sim.setSellingPrice(cmd.getSellingPrice());
+        sim.setDealerPrice(cmd.getDealerPrice());
+        sim.setStatus(cmd.getStatus());
 
         simRepo.save(sim);
 

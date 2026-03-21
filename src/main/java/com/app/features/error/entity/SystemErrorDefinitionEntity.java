@@ -16,7 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
-import com.app.base.BaseEntity;
+import com.app.core.base.BaseEntity;
 import com.app.features.error.enums.ErrorCategoryEnum;
 import com.app.features.error.vo.ExceptionClassMapping;
 

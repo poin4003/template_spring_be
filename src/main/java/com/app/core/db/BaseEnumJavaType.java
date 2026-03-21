@@ -7,7 +7,7 @@ import org.hibernate.type.descriptor.java.AbstractClassJavaType;
 import org.hibernate.type.descriptor.jdbc.JdbcType;
 import org.hibernate.type.descriptor.jdbc.JdbcTypeIndicators;
 
-import com.app.base.BaseEnum;
+import com.app.core.base.BaseEnum;
 import com.app.utils.EnumUtils;
 
 public class BaseEnumJavaType<T extends Enum<T> & BaseEnum> extends AbstractClassJavaType<T> {

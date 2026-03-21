@@ -2,11 +2,13 @@ package com.app.features.sims.entity;
 
 import java.util.UUID;
 
-import com.app.base.BaseEntity;
+import com.app.core.base.BaseEntity;
 import com.app.features.sims.enums.SimStatusEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -19,6 +21,7 @@ import lombok.EqualsAndHashCode;
 public class SimEntity extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "phone_number", unique = true, nullable = false)

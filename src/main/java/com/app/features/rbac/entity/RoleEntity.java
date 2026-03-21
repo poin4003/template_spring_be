@@ -3,7 +3,7 @@ package com.app.features.rbac.entity;
 import java.util.List;
 import java.util.UUID;
 
-import com.app.base.BaseEntity;
+import com.app.core.base.BaseEntity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

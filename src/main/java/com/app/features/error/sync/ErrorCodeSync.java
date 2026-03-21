@@ -1,4 +1,4 @@
-package com.app.features.error.service.impl;
+package com.app.features.error.sync;
 
 import java.util.Optional;
 
@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ErrorCodeSyncServiceImpl implements SyncableDataService {
+public class ErrorCodeSync implements SyncableDataService {
 
     private final SystemErrorDefinitionRepository errorRepo;
 

@@ -25,9 +25,9 @@ public class SimImportProducer {
     public void sendSimToImportQueue(CreateSimCmd cmd) {
 
         log.info("Sending SIM with phone number {} to kafka topic {}",
-                cmd.phoneNumber(), TOPIC_NAME);
+                cmd.getPhoneNumber(), TOPIC_NAME);
 
-        String simKey = cmd.phoneNumber() + "-" + UUID.randomUUID();
+        String simKey = cmd.getPhoneNumber() + "-" + UUID.randomUUID();
 
         Message<CreateSimCmd> message = MessageBuilder
                 .withPayload(cmd)

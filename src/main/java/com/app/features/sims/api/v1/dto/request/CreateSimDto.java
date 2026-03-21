@@ -14,12 +14,12 @@ public class CreateSimDto {
     @NotBlank(message = "Phone number must not be blank")
     @Size(min = 10, max = 10, message = "Phone number must be exactly 10 digits")
     @Pattern(regexp = "^[0-9]+$", message = "Phone number must contain only digits")
-    private String simPhoneNumber;
+    private String phoneNumber;
 
     @NotNull
-    private SimStatusEnum simStatus;
+    private SimStatusEnum status;
 
-    private Integer simSellingPrice;
-    private Integer simDealerPrice;
-    private Integer simImportPrice;
+    private Integer sellingPrice;
+    private Integer dealerPrice;
+    private Integer importPrice;
 }

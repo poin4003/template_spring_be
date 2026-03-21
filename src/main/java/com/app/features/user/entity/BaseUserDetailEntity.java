@@ -2,7 +2,7 @@ package com.app.features.user.entity;
 
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.app.base.BaseEntity;
+import com.app.core.base.BaseEntity;
 import com.app.features.user.enums.UserStatusEnum;
 
 import lombok.Data;

@@ -8,8 +8,8 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.lang.NonNull;
 
-import com.app.base.BaseEnum;
 import com.app.core.annotation.DatabaseEnum;
+import com.app.core.base.BaseEnum;
 import com.app.core.constant.AppConstants;
 import com.app.core.db.BaseEnumJavaType;
 

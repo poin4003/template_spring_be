@@ -1,4 +1,4 @@
-package com.app.base;
+package com.app.core.base;
 
 import java.time.LocalDateTime;
 

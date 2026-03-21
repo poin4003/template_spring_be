@@ -1,4 +1,4 @@
-package com.app.features.error.service.impl;
+package com.app.features.error.cache;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ErrorMessageCacheImpl implements SyncableDataService {
+public class ErrorMessageCache implements SyncableDataService {
 
     private final SystemErrorDefinitionRepository errorRepo;
     private final SystemErrorMessageRepository errorMessageRepo;

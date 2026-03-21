@@ -3,7 +3,7 @@ package com.app.features.auth.entity;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.app.base.BaseEntity;
+import com.app.core.base.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

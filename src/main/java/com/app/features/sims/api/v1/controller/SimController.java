@@ -8,6 +8,9 @@ import java.util.UUID;
 import org.modelmapper.ModelMapper;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -94,12 +97,15 @@ public class SimController extends BaseController {
     @GetMapping("")
     @Operation(summary = "Get list of SIM", description = "Get list of SIM")
     public ResponseEntity<ResultMessage<Page<SimDto>>> getManySims(
-            @ParameterObject GetManySimDto req) {
+            @ParameterObject GetManySimDto req,
+            @ParameterObject @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         GetManySimQuery query = modelMapper.map(req, GetManySimQuery.class);
 
         if (req.getFilter() != null) {
             modelMapper.map(req.getFilter(), query);
         }
+
+        query.setPageable(pageable);
 
         Page<SimResult> results = pipeline.send(query);
 

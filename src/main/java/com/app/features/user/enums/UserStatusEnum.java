@@ -1,7 +1,7 @@
 package com.app.features.user.enums;
 
-import com.app.base.BaseEnum;
 import com.app.core.annotation.DatabaseEnum;
+import com.app.core.base.BaseEnum;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

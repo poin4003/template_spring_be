@@ -15,5 +15,7 @@ import com.app.features.ops.enums.OpsTypeEnum;
 public interface OpsConfigRepository extends JpaRepository<OpsConfigEntity, UUID> {
     List<OpsConfigEntity> findByTypeAndStatus(OpsTypeEnum type, OpsStatusEnum status);
 
+    List<OpsConfigEntity> findByStatus(OpsStatusEnum status);
+
     Optional<OpsConfigEntity> findFirstByNameAndType(String name, OpsTypeEnum type);
 }

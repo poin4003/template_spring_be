@@ -3,6 +3,9 @@ package com.app.features.user.api.v1.controller;
 import org.modelmapper.ModelMapper;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.app.core.controller.BaseController;
 import com.app.core.vo.ResultMessage;
-import com.app.features.user.api.v1.dto.query.GetManyUserDto;
 import com.app.features.user.api.v1.dto.request.CreateUserDto;
 import com.app.features.user.api.v1.dto.response.UserDto;
 import com.app.features.user.cqrs.command.CreateUserCmd;
@@ -41,8 +43,7 @@ public class UserController extends BaseController {
     @PreAuthorize("hasRole('ADMIN_SYSTEM')")
     @Operation(summary = "Create new user (Admin only)")
     public ResponseEntity<ResultMessage<UserDto>> createUser(
-        @Valid @RequestBody CreateUserDto req
-    ) {
+            @Valid @RequestBody CreateUserDto req) {
         CreateUserCmd cmd = modelMapper.map(req, CreateUserCmd.class);
 
         UserResult result = pipeline.send(cmd);
@@ -54,14 +55,16 @@ public class UserController extends BaseController {
     @PreAuthorize("hasRole('ADMIN_SYSTEM')")
     @Operation(summary = "Get many user (Admin only)")
     public ResponseEntity<ResultMessage<Page<UserDto>>> getManyUsers(
-        @ParameterObject GetManyUserDto req
-    ) {
-        GetManyUserQuery query = modelMapper.map(req, GetManyUserQuery.class);
+            @ParameterObject @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        GetManyUserQuery query = new GetManyUserQuery();
+
+        query.setPageable(pageable);
 
         Page<UserResult> results = pipeline.send(query);
 
         Page<UserDto> res = results.map(result -> modelMapper.map(result, UserDto.class));
 
-        return OK("Get many user success", res);   
+        return OK("Get many user success", res);
     }
 }

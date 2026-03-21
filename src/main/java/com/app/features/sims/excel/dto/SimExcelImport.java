@@ -8,17 +8,17 @@ import lombok.Data;
 public class SimExcelImport {
 
     @ExcelProperty(value = "phone_number")
-    private String simPhoneNumber;
+    private String phoneNumber;
 
     @ExcelProperty(value = "selling_price")
-    private Integer simSellingPrice;
+    private Integer sellingPrice;
 
     @ExcelProperty(value = "dealer_price")
-    private Integer simDealerPrice;
+    private Integer dealerPrice;
 
     @ExcelProperty(value = "import_price")
-    private Integer simImportPrice;
+    private Integer importPrice;
     
-    @ExcelProperty(value = "sim_status_string")
-    private String simStatusString;
+    @ExcelProperty(value = "status")
+    private String status;
 }

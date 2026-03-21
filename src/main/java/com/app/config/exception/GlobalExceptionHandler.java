@@ -1,16 +1,7 @@
 package com.app.config.exception;
 
-import com.app.core.exception.MyException;
-import com.app.core.response.ResultCode;
-import com.app.core.response.ResultUtil;
-import com.app.core.vo.ResultMessage;
-import com.app.features.error.service.impl.ErrorMessageCacheImpl;
-import com.app.utils.JsonUtils;
-
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
-import io.github.resilience4j.ratelimiter.RequestNotPermitted;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,15 +14,24 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
-import java.util.Objects;
-import java.util.stream.Collectors;
+import com.app.core.exception.MyException;
+import com.app.core.response.ResultCode;
+import com.app.core.response.ResultUtil;
+import com.app.core.vo.ResultMessage;
+import com.app.features.error.cache.ErrorMessageCache;
+import com.app.utils.JsonUtils;
+
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
-    private final ErrorMessageCacheImpl messageCache;
+    private final ErrorMessageCache messageCache;
 
     private String getBaseMessage(ResultCode resultCode) {
         String message = messageCache.getMessage(resultCode.code());
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MyException.class)
     public ResponseEntity<ResultMessage<?>> handleCustomException(MyException ex) {
         ResultCode resultCode = ex.getResultCode();
-        
+
         if (ex.getResultCode().httpStatus() >= 500) {
             log.error("[MyException] System Error: code={}, msg={}", resultCode.code(), ex.getMyMessage(), ex);
         } else {
@@ -73,31 +73,29 @@ public class GlobalExceptionHandler {
         log.warn("Validation error: {}", ex.getMessage());
 
         String errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField() + ": " + 
-                    (error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value"))
+                .map(error -> error.getField() + ": " +
+                        (error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value"))
                 .collect(Collectors.joining("; "));
 
         String finalMessage = mergeMessage(ResultCode.PARAMS_ERROR, errors);
 
         return new ResponseEntity<>(
-            ResultUtil.error(ResultCode.PARAMS_ERROR, finalMessage), 
-            HttpStatus.BAD_REQUEST
-        );
+                ResultUtil.error(ResultCode.PARAMS_ERROR, finalMessage),
+                HttpStatus.BAD_REQUEST);
     }
-    
+
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ResultMessage<?>> handleBindException(BindException ex) {
         log.warn("Bind exception: {}", ex.getMessage());
         String errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining("; "));
-                
+
         String finalMessage = mergeMessage(ResultCode.PARAMS_ERROR, errors);
-        
+
         return new ResponseEntity<>(
-            ResultUtil.error(ResultCode.PARAMS_ERROR, finalMessage),
-            HttpStatus.BAD_REQUEST
-        );
+                ResultUtil.error(ResultCode.PARAMS_ERROR, finalMessage),
+                HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -107,13 +105,12 @@ public class GlobalExceptionHandler {
         String rawMessage = ex.getMostSpecificCause() != null
                 ? ex.getMostSpecificCause().getMessage()
                 : ex.getMessage();
-        
+
         String errorDetail = "Invalid JSON format: " + JsonUtils.simplifyJsonErrorMessage(rawMessage);
 
         return new ResponseEntity<>(
-            ResultUtil.error(ResultCode.PARAMS_ERROR, mergeMessage(ResultCode.PARAMS_ERROR, errorDetail)),
-            HttpStatus.BAD_REQUEST
-        );
+                ResultUtil.error(ResultCode.PARAMS_ERROR, mergeMessage(ResultCode.PARAMS_ERROR, errorDetail)),
+                HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MissingServletRequestPartException.class)
@@ -121,9 +118,8 @@ public class GlobalExceptionHandler {
         log.warn("Missing part: {}", ex.getRequestPartName());
         String detail = "Missing form-data field: " + ex.getRequestPartName();
         return new ResponseEntity<>(
-            ResultUtil.error(ResultCode.PARAMS_ERROR, mergeMessage(ResultCode.PARAMS_ERROR, detail)), 
-            HttpStatus.BAD_REQUEST
-        );
+                ResultUtil.error(ResultCode.PARAMS_ERROR, mergeMessage(ResultCode.PARAMS_ERROR, detail)),
+                HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -131,9 +127,8 @@ public class GlobalExceptionHandler {
         log.warn("Missing param: {}", ex.getParameterName());
         String detail = "Missing required parameter: " + ex.getParameterName();
         return new ResponseEntity<>(
-            ResultUtil.error(ResultCode.PARAMS_ERROR, mergeMessage(ResultCode.PARAMS_ERROR, detail)), 
-            HttpStatus.BAD_REQUEST
-        );
+                ResultUtil.error(ResultCode.PARAMS_ERROR, mergeMessage(ResultCode.PARAMS_ERROR, detail)),
+                HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MissingPathVariableException.class)
@@ -141,9 +136,8 @@ public class GlobalExceptionHandler {
         log.warn("Missing path variable: {}", ex.getVariableName());
         String detail = "Missing path variable: " + ex.getVariableName();
         return new ResponseEntity<>(
-            ResultUtil.error(ResultCode.PARAMS_ERROR, mergeMessage(ResultCode.PARAMS_ERROR, detail)), 
-            HttpStatus.BAD_REQUEST
-        );
+                ResultUtil.error(ResultCode.PARAMS_ERROR, mergeMessage(ResultCode.PARAMS_ERROR, detail)),
+                HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(RequestNotPermitted.class)
@@ -151,9 +145,8 @@ public class GlobalExceptionHandler {
         log.warn("Rate limit exceeded: {}", ex.getMessage());
         String msg = getBaseMessage(ResultCode.RATE_LIMIT_ERROR);
         return new ResponseEntity<>(
-            ResultUtil.error(ResultCode.RATE_LIMIT_ERROR, msg), 
-            HttpStatus.TOO_MANY_REQUESTS
-        );
+                ResultUtil.error(ResultCode.RATE_LIMIT_ERROR, msg),
+                HttpStatus.TOO_MANY_REQUESTS);
     }
 
     @ExceptionHandler(CallNotPermittedException.class)
@@ -161,20 +154,18 @@ public class GlobalExceptionHandler {
         log.error("Circuit Breaker OPEN: {}", ex.getMessage());
         String msg = getBaseMessage(ResultCode.CIRCUIT_BREAKER_IS_OPEN);
         return new ResponseEntity<>(
-            ResultUtil.error(ResultCode.CIRCUIT_BREAKER_IS_OPEN, msg), 
-            HttpStatus.SERVICE_UNAVAILABLE
-        );
+                ResultUtil.error(ResultCode.CIRCUIT_BREAKER_IS_OPEN, msg),
+                HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResultMessage<?>> handleAllUncaughtException(Exception ex) {
         log.error("Unknown Internal Error: ", ex);
-        
+
         String msg = getBaseMessage(ResultCode.ERROR);
-        
+
         return new ResponseEntity<>(
-            ResultUtil.error(ResultCode.ERROR, msg),
-            HttpStatus.INTERNAL_SERVER_ERROR
-        );
+                ResultUtil.error(ResultCode.ERROR, msg),
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

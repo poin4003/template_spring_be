@@ -1,4 +1,4 @@
-package com.app.features.ops.service.impl;
+package com.app.features.ops.sync;
 
 import java.util.List;
 import java.util.Map;
@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CronJobSyncServiceImpl implements SyncableDataService {
+public class CronJobSync implements SyncableDataService {
 
     private final CronJobConfigRepository cronJobRepo;
     private final OpsConfigRepository opsConfigRepo;
