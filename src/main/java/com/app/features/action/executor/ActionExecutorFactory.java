@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class ActionExecutorFactory {
 
-    private final Map<Class<? extends BaseActionConfig>, ActionExecutor<?>> executorMap;
+    private final Map<Class<? extends BaseActionConfig>, ActionExecutor<? extends BaseActionConfig>> executorMap;
 
     public ActionExecutorFactory(List<ActionExecutor<?>> executors) {
         this.executorMap = executors.stream()

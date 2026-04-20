@@ -1,10 +1,9 @@
 package com.app.features.sims.consumer;
 
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import com.app.core.annotation.RegisterMqConsumer;
 import com.app.core.exception.ExceptionFactory;
-import com.app.core.mq.handler.MessageHandler;
 import com.app.features.sims.cqrs.command.CreateSimCmd;
 
 import an.awesome.pipelinr.Pipeline;
@@ -13,13 +12,17 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@RegisterMqConsumer(topic = "import-sim-topic", group = "sim-import-group", dlq = true)
 @RequiredArgsConstructor
-public class SimImportConsumer implements MessageHandler<CreateSimCmd> {
+public class SimImportConsumer {
 
     private final Pipeline pipeline;
 
-    @Override
+    @KafkaListener(
+        id = "simImport",
+        topics = "import-sim-topic", 
+        groupId = "sim-import-group",
+        concurrency = "${app.mq.consumers.sim-import.concurrency:1}"
+    )
     public void handle(CreateSimCmd cmd) {
         if (cmd == null) {
             log.error("Received null request due to deserialization error. Skipping");

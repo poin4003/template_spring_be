@@ -41,8 +41,8 @@ public class ActionEntity extends BaseEntity {
     @Column(name = "target_type")
     private TargetTypeEnum targetType;
 
-    @Column(name = "target_id")
-    private UUID targetId;
+    @Column(name = "target_key")
+    private String targetKey;
 
     @Column(name = "action_type")
     private ActionTypeEnum actionType;

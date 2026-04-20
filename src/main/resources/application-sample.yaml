@@ -1,9 +1,6 @@
 # Server config
 server:
     port: 8080
-    tomcat:
-        threads:
-            max: 200
 
 # App config
 app:
@@ -23,6 +20,14 @@ app:
             default-max-attempts: 3
             default-backoff-ms: 2000
             default-multiplier: 1.5
+        consumers:
+            sim-import:
+                concurrency: 5
+    async-tasks:
+        excel:
+            export-sim:
+                chunk-rows: 10000
+                max-concurrent: 2
 
 # Spring config
 spring:

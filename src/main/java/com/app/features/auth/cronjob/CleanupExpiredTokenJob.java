@@ -3,8 +3,8 @@ package com.app.features.auth.cronjob;
 import org.springframework.stereotype.Component;
 
 import com.app.features.auth.service.RefreshTokenService;
-import com.app.features.ops.annotation.CronJobDef;
-import com.app.features.ops.scheduler.JobHandler;
+import com.app.features.cronjob.annotation.CronJobDef;
+import com.app.features.cronjob.scheduler.JobHandler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

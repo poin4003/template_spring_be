@@ -1,7 +1,5 @@
 package com.app.features.action.service.schema.command;
 
-import java.util.UUID;
-
 import com.app.features.action.enums.ActionTypeEnum;
 import com.app.features.action.enums.TargetTypeEnum;
 import com.app.features.action.vo.BaseActionConfig;
@@ -14,14 +12,14 @@ import lombok.Data;
 
 @Data
 public class CreateActionCmd {
-    
+    // TODO: refactor to pipeliner 
     @NotBlank(message = "Rule name is required")
     private String ruleName;
 
     @NotNull
     private TargetTypeEnum targetType;
 
-    private UUID targetId;
+    private String targetKey;
 
     private ErrorCategoryEnum matchCategory;
 

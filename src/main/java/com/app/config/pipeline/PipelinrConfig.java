@@ -20,8 +20,8 @@ public class PipelinrConfig {
             ObjectProvider<Command.Middleware> middlewares) {
 
         return new Pipelinr()
-                .with(commandHandlers::stream)
-                .with(notificationHandlers::stream)
-                .with(middlewares::stream);
+                .with(() -> commandHandlers.orderedStream())
+                .with(() -> notificationHandlers.orderedStream())
+                .with(() -> middlewares.orderedStream());
     }
 }
