@@ -101,6 +101,7 @@ spring:
             value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
             properties:
                 "[spring.json.add.type.headers]": false
+                "[partitioner.class]": com.app.config.kafka.GlobalConsistentPartitioner
 
 # Swagger
 springdoc:
