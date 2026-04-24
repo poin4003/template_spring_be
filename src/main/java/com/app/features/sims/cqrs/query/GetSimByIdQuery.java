@@ -29,7 +29,7 @@ class GetSimByIdHandler implements Command.Handler<GetSimByIdQuery, SimResult> {
         UUID id = Objects.requireNonNull(query.Id(), "Sim Id must be not null");
 
         SimEntity sim = simRepo.findById(id)
-                .orElseThrow(() -> ExceptionFactory.dataNotFound("Sim: " + query.Id()));
+                .orElseThrow(() -> ExceptionFactory.notFound("Sim: " + query.Id()));
 
         return modelMapper.map(sim, SimResult.class);
     }

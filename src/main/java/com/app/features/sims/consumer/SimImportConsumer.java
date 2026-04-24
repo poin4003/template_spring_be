@@ -31,7 +31,7 @@ public class SimImportConsumer {
 
         if ("9999999999".equals(cmd.getPhoneNumber())) {
             log.warn(">>> SIMULATION: Triggering Artificial Error for DLQ Test! <<<");
-            throw ExceptionFactory.importSimError();
+            throw ExceptionFactory.importSimError("Simulator import sim error");
         }
 
         log.info("Received created Sim: {}", cmd);

@@ -11,20 +11,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.excel.EasyExcel;
-import com.app.core.controller.BaseController;
 import com.app.core.exception.ExceptionFactory;
-import com.app.core.vo.ResultMessage;
+import com.app.core.response.ApiResult;
 import com.app.features.sims.api.v1.dto.query.GetManySimDto;
 import com.app.features.sims.api.v1.dto.query.SimFilterDto;
 import com.app.features.sims.api.v1.dto.request.CreateSimDto;
@@ -37,8 +37,6 @@ import com.app.features.sims.excel.dto.SimExcelExport;
 import com.app.features.sims.service.SimService;
 
 import an.awesome.pipelinr.Pipeline;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -55,7 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/sim")
 @Tag(name = "SIM Management V1", description = "Sim docs")
-public class SimController extends BaseController {
+public class SimController {
 
     private final Pipeline pipeline;
     private final SimService simService;
@@ -63,25 +61,26 @@ public class SimController extends BaseController {
 
     @PostMapping("")
     @Operation(summary = "Create a new SIM", description = "Create a new SIM")
-    public ResponseEntity<ResultMessage<SimDto>> createSim(@Valid @RequestBody CreateSimDto req) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResult<SimDto> createSim(@Valid @RequestBody CreateSimDto req) {
         CreateSimCmd cmd = modelMapper.map(req, CreateSimCmd.class);
 
         SimResult result = pipeline.send(cmd);
 
-        return Created(modelMapper.map(result, SimDto.class));
+        return ApiResult.ok(modelMapper.map(result, SimDto.class), "Create sim success!");
     }
 
     @PostMapping(value = "/import_sim", consumes = { "multipart/form-data" })
     @Operation(summary = "Import SIM data from Excel file", description = "Uploads an Excel file to push SIM data to Kafka queue.")
-    public ResponseEntity<ResultMessage<String>> importSims(
+    public ApiResult<String> importSims(
             @RequestPart("file") @Schema(type = "string", format = "binary") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
-            throw ExceptionFactory.dataNotFound("Please, send request with file");
+            throw ExceptionFactory.notFound("Please, send request with file");
         }
 
         simService.importSimsFromExcel(file);
 
-        return OK("File import sim already in progress");
+        return ApiResult.ok(null, "File import sim already in progress");
     }
 
     @PostMapping("/test/excel")
@@ -96,7 +95,7 @@ public class SimController extends BaseController {
 
     @GetMapping("")
     @Operation(summary = "Get list of SIM", description = "Get list of SIM")
-    public ResponseEntity<ResultMessage<Page<SimDto>>> getManySims(
+    public ApiResult<Page<SimDto>> getManySims(
             @ParameterObject GetManySimDto req,
             @ParameterObject @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         GetManySimQuery query = modelMapper.map(req, GetManySimQuery.class);
@@ -111,7 +110,7 @@ public class SimController extends BaseController {
 
         Page<SimDto> response = results.map(result -> modelMapper.map(result, SimDto.class));
 
-        return OK("Get many sim success", response);
+        return ApiResult.ok(response, "Get many sim success");
     }
 
     @GetMapping("/export_sims")
@@ -141,15 +140,13 @@ public class SimController extends BaseController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get SIM by ID", description = "Get SIM by ID")
-    @RateLimiter(name = "default")
-    @CircuitBreaker(name = "checkRandom")
-    public ResponseEntity<ResultMessage<SimDto>> getSimById(@PathVariable UUID id) {
+    public ApiResult<SimDto> getSimById(@PathVariable UUID id) {
         log.info("Controller:-> getSimById | {}", id);
 
         GetSimByIdQuery query = new GetSimByIdQuery(id);
 
         SimResult result = pipeline.send(query);
 
-        return OK("Get sim success", modelMapper.map(result, SimDto.class));
+        return ApiResult.ok(modelMapper.map(result, SimDto.class), "Get sim success");
     }
 }

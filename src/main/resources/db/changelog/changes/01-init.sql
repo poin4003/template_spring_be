@@ -78,54 +78,7 @@ CREATE TABLE "sim" (
     CONSTRAINT "uk_sim_phone" UNIQUE ("phone_number")
 );
 
--- 4. Action & Error Engine (JSONB & target_key)
-CREATE TABLE "system_error_definition" (
-    "id" UUID NOT NULL,
-    "code" INTEGER NOT NULL,
-    "alias_key" VARCHAR(255) NOT NULL,
-    "http_status" INTEGER NOT NULL,
-    "category" INTEGER NOT NULL,
-    "exception_class_name" JSONB,
-    "created_at" TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    "updated_at" TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    CONSTRAINT "system_error_definition_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "uk_error_code" UNIQUE ("code")
-);
-
-CREATE TABLE "system_error_message" (
-    "id" UUID NOT NULL,
-    "error_defination_id" UUID NOT NULL,
-    "language_code" VARCHAR(10) NOT NULL,
-    "content" TEXT NOT NULL,
-    "created_at" TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    "updated_at" TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    CONSTRAINT "system_error_message_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "fk_sem_definition" FOREIGN KEY ("error_defination_id") REFERENCES "system_error_definition" ("id")
-);
-
-CREATE TABLE "action" (
-    "id" UUID NOT NULL,
-    "name" VARCHAR(255),
-    "target_type" INTEGER,
-    "target_key" VARCHAR(255),
-    "action_type" INTEGER,
-    "config_data" JSONB,
-    "priority" INTEGER,
-    "status" INTEGER,
-    "created_at" TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    "updated_at" TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    CONSTRAINT "action_pkey" PRIMARY KEY ("id")
-);
-
-CREATE TABLE "action_mapping" (
-    "action_id" UUID NOT NULL,
-    "error_id" UUID NOT NULL,
-    CONSTRAINT "action_mapping_pkey" PRIMARY KEY ("action_id", "error_id"),
-    CONSTRAINT "fk_am_action" FOREIGN KEY ("action_id") REFERENCES "action" ("id"),
-    CONSTRAINT "fk_am_error" FOREIGN KEY ("error_id") REFERENCES "system_error_definition" ("id")
-);
-
--- 5. Infrastructure & Auth
+-- 4. Infrastructure & Auth
 CREATE TABLE "cronjob_config" (
     "id" UUID NOT NULL,
     "name" VARCHAR(255),

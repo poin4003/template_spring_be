@@ -1,101 +1,46 @@
 package com.app.core.exception;
 
-import com.app.core.exception.category.InfrastructureException;
-import com.app.core.response.ResultCode;
+import org.springframework.http.HttpStatus;
 
 public final class ExceptionFactory {
 
-    private ExceptionFactory() {}
-
-    private static MyException create(ResultCode code, String messageDetail) {
-        String finalMessge = (messageDetail == null || messageDetail.trim().isEmpty() ? null : messageDetail);
-
-        try {
-            return code.getExceptionClass()
-                    .getConstructor(ResultCode.class, int.class, String.class)
-                    .newInstance(code, code.httpStatus(), finalMessge);
-        } catch (Exception e) {
-            return new InfrastructureException(ResultCode.ERROR, 500, finalMessge);
-        }
+    private ExceptionFactory() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
-    public static MyException dataNotFound() {
-        return create(ResultCode.RESOURCE_NOT_FOUND, null);
+    // --- Auth Errors (401) ---
+    public static MyException invalidToken(String message) {
+        return new MyException("INVALID_TOKEN", HttpStatus.UNAUTHORIZED.value(), message);
     }
 
-    public static MyException dataNotFound(String messageDetail) {
-        return create(ResultCode.RESOURCE_NOT_FOUND, messageDetail);
+    public static MyException accessTokenExpired(String message) {
+        return new MyException("ACCESS_TOKEN_EXPIRED", HttpStatus.UNAUTHORIZED.value(), message);
     }
 
-    public static MyException dataAlreadyExists() {
-        return create(ResultCode.RESOURCE_ALREADY_EXIST, null);
+    // --- Business Errors (400, 404) ---
+    public static MyException notFound(String message) {
+        return new MyException("RESOURCE_NOT_FOUND", HttpStatus.NOT_FOUND.value(), message);
     }
 
-    public static MyException dataAlreadyExists(String messageDetail) {
-        return create(ResultCode.RESOURCE_ALREADY_EXIST, messageDetail);
+    public static MyException alreadyExists(String message) {
+        return new MyException("RESOURCE_ALREADY_EXISTS", HttpStatus.BAD_REQUEST.value(), message);
     }
 
-    public static MyException serverError() {
-        return create(ResultCode.ERROR, null);
+    public static MyException invalidParam(String message) {
+        return new MyException("INVALID_PARAM", HttpStatus.BAD_REQUEST.value(), message);
     }
 
-    public static MyException serverError(String messageDetail) {
-        return create(ResultCode.ERROR, messageDetail);
+    // --- Security Error (401, 403)
+    public static MyException permissionError(String message) {
+        return new MyException("PERMISSION_ERROR", HttpStatus.UNAUTHORIZED.value(), message);
     }
 
-    public static MyException validationError() {
-        return create(ResultCode.PARAMS_ERROR, null); 
+    // --- Infrastructure/System Errors (500) ---
+    public static MyException serverError(String message) {
+        return new MyException("INTERNAL_SERVER_ERROR", HttpStatus.INTERNAL_SERVER_ERROR.value(), message);
     }
 
-    public static MyException validationError(String messageDetail) {
-        return create(ResultCode.PARAMS_ERROR, messageDetail); 
-    }
-
-    public static MyException tooManyRequest() {
-        return create(ResultCode.RATE_LIMIT_ERROR, null);
-    }
-
-    public static MyException tooManyRequest(String messageDetail) {
-        return create(ResultCode.RATE_LIMIT_ERROR, messageDetail);
-    }
-
-    public static MyException sessionExpired() {
-        return create(ResultCode.USER_SESSION_EXPIRED, null);
-    }
-
-    public static MyException sessionExpired(String messageDetail) {
-        return create(ResultCode.USER_SESSION_EXPIRED, messageDetail);
-    }
-
-    public static MyException invalidTokenError() {
-        return create(ResultCode.USER_AUTH_ERROR, null);
-    }
-
-    public static MyException invalidTokenError(String messageDetail) {
-        return create(ResultCode.USER_AUTH_ERROR, messageDetail);
-    }
-
-    public static MyException permissionError() {
-        return create(ResultCode.USER_PERMISSION_ERROR, null);
-    }
-
-    public static MyException permissionError(String messageDetail) {
-        return create(ResultCode.USER_PERMISSION_ERROR, messageDetail);
-    }
-
-    public static MyException myError(ResultCode resultCode) {
-        return create(resultCode, null);
-    }
-
-    public static MyException myError(ResultCode resultCode, String messageDetail) {
-        return create(resultCode, messageDetail);
-    }
-
-    public static MyException importSimError() {
-        return create(ResultCode.IMPORT_SIM_ERROR, null);
-    }
-
-    public static MyException importSimError(String messageDetail) {
-        return create(ResultCode.IMPORT_SIM_ERROR, messageDetail);
+    public static MyException importSimError(String message) {
+        return new MyException("IMPORT_SIM_ERROR", HttpStatus.INTERNAL_SERVER_ERROR.value(), message);
     }
 }

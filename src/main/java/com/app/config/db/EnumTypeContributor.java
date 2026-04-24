@@ -13,7 +13,7 @@ import com.app.core.base.BaseEnum;
 import com.app.core.constant.AppConstants;
 import com.app.core.db.BaseEnumJavaType;
 
-public class DynamicEnumTypeContributor implements TypeContributor {
+public class EnumTypeContributor implements TypeContributor {
 
     @Override
     public void contribute(TypeContributions typeContributions, ServiceRegistry serviceRegistry) {

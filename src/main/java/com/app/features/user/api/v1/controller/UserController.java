@@ -6,16 +6,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.app.core.controller.BaseController;
-import com.app.core.vo.ResultMessage;
+import com.app.core.response.ApiResult;
 import com.app.features.user.api.v1.dto.request.CreateUserDto;
 import com.app.features.user.api.v1.dto.response.UserDto;
 import com.app.features.user.cqrs.command.CreateUserCmd;
@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
 @Tag(name = "USER Management V1", description = "User docs")
-public class UserController extends BaseController {
+public class UserController {
 
     private final ModelMapper modelMapper;
     private final Pipeline pipeline;
@@ -42,19 +42,20 @@ public class UserController extends BaseController {
     @PostMapping("/")
     @PreAuthorize("hasRole('ADMIN_SYSTEM')")
     @Operation(summary = "Create new user (Admin only)")
-    public ResponseEntity<ResultMessage<UserDto>> createUser(
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResult<UserDto> createUser(
             @Valid @RequestBody CreateUserDto req) {
         CreateUserCmd cmd = modelMapper.map(req, CreateUserCmd.class);
 
         UserResult result = pipeline.send(cmd);
 
-        return Created(modelMapper.map(result, UserDto.class));
+        return ApiResult.ok(modelMapper.map(result, UserDto.class), "Create user sucess!");
     }
 
     @GetMapping("/")
     @PreAuthorize("hasRole('ADMIN_SYSTEM')")
     @Operation(summary = "Get many user (Admin only)")
-    public ResponseEntity<ResultMessage<Page<UserDto>>> getManyUsers(
+    public ApiResult<Page<UserDto>> getManyUsers(
             @ParameterObject @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         GetManyUserQuery query = new GetManyUserQuery();
@@ -65,6 +66,6 @@ public class UserController extends BaseController {
 
         Page<UserDto> res = results.map(result -> modelMapper.map(result, UserDto.class));
 
-        return OK("Get many user success", res);
+        return ApiResult.ok(res, "Get many user success");
     }
 }

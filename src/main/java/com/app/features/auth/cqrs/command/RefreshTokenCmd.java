@@ -52,10 +52,10 @@ class RefreshTokenHanlder implements Command.Handler<RefreshTokenCmd, LoginResul
 
         UUID userId = jwtTokenProvider.getUserIdFromTokenUnverified(cmd.refreshToken());
         if (userId == null)
-            throw ExceptionFactory.dataNotFound("userId " + userId);
+            throw ExceptionFactory.notFound("userId " + userId);
 
         KeyStoreEntity keyStore = keyStoreRepo.findByUserId(userId)
-                .orElseThrow(() -> ExceptionFactory.dataNotFound("User keystore not found. Please login again."));
+                .orElseThrow(() -> ExceptionFactory.notFound("User keystore not found. Please login again."));
 
         if (!cmd.refreshToken().equals(keyStore.getRefreshToken())) {
             throw ExceptionFactory.permissionError("Invalid refresh token, please relogin!");
@@ -77,7 +77,7 @@ class RefreshTokenHanlder implements Command.Handler<RefreshTokenCmd, LoginResul
         consumedRefreshTokenRepo.save(history);
 
         UserBaseEntity user = userBaseRepo.findById(userId)
-                .orElseThrow(() -> ExceptionFactory.dataNotFound("User " + userId));
+                .orElseThrow(() -> ExceptionFactory.notFound("User " + userId));
 
         return authService.generateAndSaveTokens(userId, user.getEmail());
     }

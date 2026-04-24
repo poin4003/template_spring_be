@@ -32,7 +32,7 @@ class LogoutHandler implements Command.Handler<LogoutCmd, Void> {
         UUID userId = Objects.requireNonNull(cmd.userId(), "User id must be not null");
 
         UserBaseEntity user = userBaseRepo.findById(userId)
-            .orElseThrow(() -> ExceptionFactory.dataNotFound("User: " + cmd.userId()));
+            .orElseThrow(() -> ExceptionFactory.notFound("User: " + cmd.userId()));
 
         updateLogoutInfo(user);
 

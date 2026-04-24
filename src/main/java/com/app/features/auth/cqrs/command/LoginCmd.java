@@ -45,7 +45,7 @@ class LoginHandler implements Command.Handler<LoginCmd, LoginResult> {
         String email = Objects.requireNonNull(cmd.email(), "Email must be not null");
 
         UserBaseEntity user = userBaseRepo.findByEmail(email)
-                .orElseThrow(() -> ExceptionFactory.dataNotFound("User: " + userId));
+                .orElseThrow(() -> ExceptionFactory.notFound("User: " + userId));
 
         updateUserLoginInfo(user, cmd.ipAddress());
 

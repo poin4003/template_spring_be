@@ -34,7 +34,7 @@ class CreateSimHandler implements Command.Handler<CreateSimCmd, SimResult> {
     @Override
     public SimResult handle(CreateSimCmd cmd) {
         if (simRepo.existsByPhoneNumber(cmd.getPhoneNumber())) {
-            throw ExceptionFactory.dataAlreadyExists("PhoneNumber " + cmd.getPhoneNumber());
+            throw ExceptionFactory.alreadyExists("PhoneNumber " + cmd.getPhoneNumber());
         }
 
         SimEntity sim = new SimEntity();

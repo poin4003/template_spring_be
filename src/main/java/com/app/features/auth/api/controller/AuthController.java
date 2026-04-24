@@ -1,16 +1,14 @@
 package com.app.features.auth.api.controller;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.app.core.controller.BaseController;
+import com.app.core.response.ApiResult;
 import com.app.core.security.UserPrincipal;
-import com.app.core.vo.ResultMessage;
 import com.app.features.auth.api.dto.request.LoginRequest;
 import com.app.features.auth.api.dto.request.RefreshTokenRequest;
 import com.app.features.auth.api.dto.response.LoginResponse;
@@ -29,13 +27,13 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @Tag(name = "Authentication V1", description = "Auth docs")
-public class AuthController extends BaseController {
+public class AuthController {
 
     private final Pipeline pipeline;
     private final ModelMapper modelMapper;
 
     @PostMapping("/login")
-    public ResponseEntity<ResultMessage<LoginResponse>> login(
+    public ApiResult<LoginResponse> login(
             @RequestBody LoginRequest req
     // @ClientIp String ipAddress
     ) {
@@ -48,21 +46,21 @@ public class AuthController extends BaseController {
 
         LoginResult result = pipeline.send(cmd);
 
-        return OK("Login success", modelMapper.map(result, LoginResponse.class));
+        return ApiResult.ok(modelMapper.map(result, LoginResponse.class), "Login success");
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ResultMessage<LoginResponse>> refreshToken(
+    public ApiResult<LoginResponse> refreshToken(
             @RequestBody RefreshTokenRequest req) {
         RefreshTokenCmd cmd = new RefreshTokenCmd(req.getRefreshToken());
 
         LoginResult result = pipeline.send(cmd);
 
-        return OK("Refresh token success", modelMapper.map(result, LoginResponse.class));
+        return ApiResult.ok(modelMapper.map(result, LoginResponse.class), "Refresh token success");
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ResultMessage<Void>> logout(@AuthenticationPrincipal UserPrincipal currentUser) {
+    public ApiResult<Void> logout(@AuthenticationPrincipal UserPrincipal currentUser) {
         if (currentUser != null && currentUser.getKeyStore() != null) {
             LogoutCmd cmd = new LogoutCmd(
                     currentUser.getKeyStore().getKeyStoreId(),
@@ -70,6 +68,6 @@ public class AuthController extends BaseController {
 
             pipeline.send(cmd);
         }
-        return OK("Logout success", null);
+        return ApiResult.ok(null, "Logout success");
     }
 }

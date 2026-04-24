@@ -1,32 +1,21 @@
 package com.app.core.exception;
 
-import com.app.core.response.ResultCode;
+import lombok.Getter;
 
-public class MyException extends RuntimeException{
-    private final ResultCode resultCode;
+@Getter
+public class MyException extends RuntimeException {
+    private final String error;
     private final int httpStatusCode;
-    private final String myMessage;
+    private final Object details;
 
-    public MyException(ResultCode resultCode, int httpStatusCode) {
-        this(resultCode, httpStatusCode, null);
+    public MyException(String error, int httpStatusCode, String message) {
+        this(error, httpStatusCode, message, null);
     }
 
-    public MyException(ResultCode resultCode, int httpStatusCode, String myMessage) {
-        super(resultCode.message());
-        this.resultCode = resultCode;
+    public MyException(String error, int httpStatusCode, String message, Object details) {
+        super(message);
+        this.error = error;
         this.httpStatusCode = httpStatusCode;
-        this.myMessage = myMessage;
-    } 
-
-    public ResultCode getResultCode() {
-        return resultCode;
-    }
-
-    public int getHttpStatusCode() {
-        return httpStatusCode;
-    }
-
-    public String getMyMessage() {
-        return myMessage;
+        this.details = details;
     }
 }
