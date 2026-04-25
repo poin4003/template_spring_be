@@ -40,7 +40,7 @@ public class CronJobServiceImpl implements CronJobService {
     private final Map<String, ScheduledFuture<?>> scheduledTasks = new HashMap<>();
 
     private final RedisService redisService;
-    private static final String CRON_STATUS_PREFIX = "ops:cronjob:status";
+    private static final String CRON_STATUS_PREFIX = "cronjob:status";
 
     public CronJobServiceImpl(
             TaskScheduler taskScheduler,

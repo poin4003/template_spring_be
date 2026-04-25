@@ -38,7 +38,7 @@ public class CronJobSync implements SyncableDataService {
 
     @Override
     public int getOrder() {
-        return 5;
+        return 3;
     }
 
     @Override

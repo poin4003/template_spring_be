@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 
 import com.esotericsoftware.kryo.serializers.FieldSerializer.NotNull;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
@@ -22,6 +23,16 @@ public class AppProperties {
     private final Security security = new Security();
     private final Mq mq = new Mq();
     private final AsyncTasks asyncTasks = new AsyncTasks();
+    private final SystemAdmin systemAdmin = new SystemAdmin();
+
+    @Data
+    public static class SystemAdmin {
+        @NotBlank
+        private String email = "superadmin@app.com";
+
+        @NotBlank
+        private String password = "change-me";
+    }
 
     @Data
     public static class Cors {

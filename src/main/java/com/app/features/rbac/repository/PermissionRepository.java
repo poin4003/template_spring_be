@@ -30,4 +30,6 @@ public interface PermissionRepository
                         WHERE ur.user_id = :userId
                         """, nativeQuery = true)
         List<PermissionEntity> findByUserId(@Param("userId") UUID userId);
+
+        boolean existsByKey(String key);
 }

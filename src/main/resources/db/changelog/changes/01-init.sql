@@ -114,35 +114,3 @@ CREATE TABLE "consumed_refresh_token" (
     "updated_at" TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT "consumed_refresh_token_pkey" PRIMARY KEY ("id")
 );
-
--- changeset pchuy:20260420-2 splitStatements:false
--- Master Data Seed
-DO $BODY$
-DECLARE
-    ADMIN_RID UUID := 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b01';
-    ADMIN_UID UUID := 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01';
-BEGIN
-    -- 1. Insert Role
-    INSERT INTO role (id, name, key, created_at, updated_at) 
-    VALUES (ADMIN_RID, 'Admin system', 'ADMIN_SYSTEM', now(), now())
-    ON CONFLICT DO NOTHING;
-
-    -- 2. Insert Permissions
-    INSERT INTO permission (id, name, key, created_at, updated_at) VALUES 
-        (gen_random_uuid(), 'Manage Action Engine', 'system:action:manage', now(), now()),
-        (gen_random_uuid(), 'Manage Sim Inventory', 'system:sim:manage', now(), now())
-    ON CONFLICT DO NOTHING;
-
-    -- 3. Insert Admin User (Password: 123456)
-    INSERT INTO user_base (id, email, password, status, del_flag, created_at, updated_at) 
-    VALUES (ADMIN_UID, 'admin@app.com', '$2b$10$aFCsDS3JNrk3lR/mopRPROvACMVX4rj8v0QTpalcFbuUc9YuYqwFu', 1, '0', now(), now())
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO user_info (id, username, phone_number, created_at, updated_at)
-    VALUES (ADMIN_UID, 'System Admin', '0999999999', now(), now())
-    ON CONFLICT DO NOTHING;
-
-    -- 4. Map Role to User
-    INSERT INTO user_roles (user_id, role_id) VALUES (ADMIN_UID, ADMIN_RID)
-    ON CONFLICT DO NOTHING;
-END $BODY$;

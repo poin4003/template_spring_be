@@ -1,6 +1,7 @@
 package com.app.features.rbac.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,4 +23,6 @@ public interface RoleRepository extends JpaRepository<RoleEntity, UUID>, JpaSpec
     List<RoleEntity> findByUserId(@Param("userId") UUID userId);
 
     boolean existsByKey(String key);
+
+    Optional<RoleEntity> findByKey(String key);
 }

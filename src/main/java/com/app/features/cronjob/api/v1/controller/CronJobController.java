@@ -21,8 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/ops/cronjobs")
-@Tag(name = "OPS Cronjob Management V1", description = "Manage dynamic cronjobs")
+@RequestMapping("/api/v1/cronjobs")
+@Tag(name = "Cronjob Management V1", description = "Manage dynamic cronjobs")
 public class CronJobController {
 
     private final CronJobService cronJobService;
