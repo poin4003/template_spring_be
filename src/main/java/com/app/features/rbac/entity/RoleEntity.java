@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.app.core.base.BaseEntity;
+import com.app.features.user.entity.UserBaseEntity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,6 +16,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Table(name = "role")
@@ -35,4 +37,9 @@ public class RoleEntity extends BaseEntity {
         inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private List<PermissionEntity> permissions;
+
+    @ManyToMany(mappedBy = "roles")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<UserBaseEntity> users;
 }

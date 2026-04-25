@@ -26,6 +26,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Table(name = "user_base")
@@ -59,6 +60,8 @@ public class UserBaseEntity extends BaseUserDetailEntity {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<RoleEntity> roles;
 
     @Override

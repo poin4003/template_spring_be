@@ -18,7 +18,7 @@ import com.app.features.sims.excel.dto.SimExcelImport;
 import com.app.features.sims.filter.SimFilterCriteria;
 import com.app.features.sims.producer.SimImportProducer;
 import com.app.features.sims.repository.SimRepsitory;
-import com.app.features.sims.repository.spec.SimSpecifications;
+import com.app.features.sims.repository.spec.SimSpecification;
 import com.app.features.sims.service.SimService;
 import com.app.utils.TaskRunnerUtils;
 import com.app.utils.ThreadPoolUtils;
@@ -55,7 +55,7 @@ public class SimServiceImpl implements SimService {
 
     @Override
     public List<SimExcelExport> getAllSimExcelExport(SimFilterCriteria criteria) {
-        Specification<SimEntity> spec = SimSpecifications.withFilter(criteria);
+        Specification<SimEntity> spec = SimSpecification.withFilter(criteria);
 
         List<SimEntity> allSimEntities = simRepo.findAll(spec);
 

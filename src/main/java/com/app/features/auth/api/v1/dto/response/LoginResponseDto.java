@@ -1,9 +1,9 @@
-package com.app.features.auth.api.dto.response;
+package com.app.features.auth.api.v1.dto.response;
 
 import lombok.Data;
 
 @Data
-public class LoginResponse {
+public class LoginResponseDto {
 
     private String accessToken;
 

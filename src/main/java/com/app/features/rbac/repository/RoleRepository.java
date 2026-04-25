@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.app.features.rbac.entity.RoleEntity;
 
 @Repository
-public interface RoleRepository extends JpaRepository<RoleEntity, UUID> {
+public interface RoleRepository extends JpaRepository<RoleEntity, UUID>, JpaSpecificationExecutor<RoleEntity> {
 
     @Query(value = """
             SELECT r.* FROM role r
@@ -19,4 +20,6 @@ public interface RoleRepository extends JpaRepository<RoleEntity, UUID> {
             WHERE ur.user_id = :userId
             """, nativeQuery = true)
     List<RoleEntity> findByUserId(@Param("userId") UUID userId);
+
+    boolean existsByKey(String key);
 }

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,7 @@ import com.app.features.user.api.v1.dto.response.UserDto;
 import com.app.features.user.cqrs.command.CreateUserCmd;
 import com.app.features.user.cqrs.query.GetManyUserQuery;
 import com.app.features.user.cqrs.result.UserResult;
+import com.app.features.user.entity.UserBaseEntity;
 
 import an.awesome.pipelinr.Pipeline;
 import io.swagger.v3.oas.annotations.Operation;
@@ -67,5 +69,11 @@ public class UserController {
         Page<UserDto> res = results.map(result -> modelMapper.map(result, UserDto.class));
 
         return ApiResult.ok(res, "Get many user success");
+    }
+
+    @GetMapping("/info")
+    public ApiResult<UserBaseEntity> getUserInfo(Authentication authentication) {
+        UserBaseEntity principal = (UserBaseEntity) authentication.getPrincipal();
+        return ApiResult.ok(principal, "Get user principal success!");
     }
 }

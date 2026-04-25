@@ -14,7 +14,7 @@ import com.app.features.sims.entity.SimEntity;
 import com.app.features.sims.enums.SimStatusEnum;
 import com.app.features.sims.filter.SimFilterCriteria;
 import com.app.features.sims.repository.SimRepsitory;
-import com.app.features.sims.repository.spec.SimSpecifications;
+import com.app.features.sims.repository.spec.SimSpecification;
 
 import an.awesome.pipelinr.Command;
 import lombok.Data;
@@ -39,16 +39,16 @@ public class GetManySimQuery implements Command<Page<SimResult>>, SimFilterCrite
 class GetManySimHandler implements Command.Handler<GetManySimQuery, Page<SimResult>> {
 
     private final SimRepsitory simRepo;
-    private final ModelMapper modelMapper;
+    private final ModelMapper mapper;
 
     @Override
     public Page<SimResult> handle(GetManySimQuery query) {
         Pageable pageable = Objects.requireNonNull(query.getPageable());
 
-        Specification<SimEntity> spec = SimSpecifications.withFilter(query);
+        Specification<SimEntity> spec = SimSpecification.withFilter(query);
 
         Page<SimEntity> entityPage = simRepo.findAll(spec, pageable);
 
-        return entityPage.map(result -> modelMapper.map(result, SimResult.class));
+        return entityPage.map(result -> mapper.map(result, SimResult.class));
     }
 }

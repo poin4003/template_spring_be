@@ -25,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.excel.EasyExcel;
 import com.app.core.exception.ExceptionFactory;
 import com.app.core.response.ApiResult;
-import com.app.features.sims.api.v1.dto.query.GetManySimDto;
 import com.app.features.sims.api.v1.dto.query.SimFilterDto;
 import com.app.features.sims.api.v1.dto.request.CreateSimDto;
 import com.app.features.sims.api.v1.dto.response.SimDto;
@@ -57,17 +56,17 @@ public class SimController {
 
     private final Pipeline pipeline;
     private final SimService simService;
-    private final ModelMapper modelMapper;
+    private final ModelMapper mapper;
 
     @PostMapping("")
     @Operation(summary = "Create a new SIM", description = "Create a new SIM")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResult<SimDto> createSim(@Valid @RequestBody CreateSimDto req) {
-        CreateSimCmd cmd = modelMapper.map(req, CreateSimCmd.class);
+        CreateSimCmd cmd = mapper.map(req, CreateSimCmd.class);
 
         SimResult result = pipeline.send(cmd);
 
-        return ApiResult.ok(modelMapper.map(result, SimDto.class), "Create sim success!");
+        return ApiResult.ok(mapper.map(result, SimDto.class), "Create sim success!");
     }
 
     @PostMapping(value = "/import_sim", consumes = { "multipart/form-data" })
@@ -96,19 +95,15 @@ public class SimController {
     @GetMapping("")
     @Operation(summary = "Get list of SIM", description = "Get list of SIM")
     public ApiResult<Page<SimDto>> getManySims(
-            @ParameterObject GetManySimDto req,
+            @ParameterObject SimFilterDto req,
             @ParameterObject @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        GetManySimQuery query = modelMapper.map(req, GetManySimQuery.class);
-
-        if (req.getFilter() != null) {
-            modelMapper.map(req.getFilter(), query);
-        }
+        GetManySimQuery query = mapper.map(req, GetManySimQuery.class);
 
         query.setPageable(pageable);
 
         Page<SimResult> results = pipeline.send(query);
 
-        Page<SimDto> response = results.map(result -> modelMapper.map(result, SimDto.class));
+        Page<SimDto> response = results.map(result -> mapper.map(result, SimDto.class));
 
         return ApiResult.ok(response, "Get many sim success");
     }
@@ -147,6 +142,6 @@ public class SimController {
 
         SimResult result = pipeline.send(query);
 
-        return ApiResult.ok(modelMapper.map(result, SimDto.class), "Get sim success");
+        return ApiResult.ok(mapper.map(result, SimDto.class), "Get sim success");
     }
 }
