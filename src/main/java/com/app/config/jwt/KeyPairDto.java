@@ -1,4 +1,4 @@
-package com.app.config.security.crypto.dto;
+package com.app.config.jwt;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

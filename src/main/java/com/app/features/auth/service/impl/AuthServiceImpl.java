@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.app.config.jwt.JwtPayload;
 import com.app.config.jwt.JwtTokenProvider;
-import com.app.config.security.crypto.dto.KeyPairDto;
+import com.app.config.jwt.KeyPairDto;
 import com.app.features.auth.cqrs.result.LoginResult;
 import com.app.features.auth.entity.KeyStoreEntity;
 import com.app.features.auth.repository.KeyStoreRepository;

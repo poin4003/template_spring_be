@@ -7,8 +7,6 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.app.config.security.crypto.CryptoStrategy;
-import com.app.config.security.crypto.dto.KeyPairDto;
 import com.app.config.settings.AppProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,13 +21,14 @@ public class JwtTokenProvider {
 
     private final AppProperties appProperties;
     private final ObjectMapper objectMapper;
-    private final CryptoStrategy cryptoStrategy;
+
+    private final JwtCryptoService jwtCrypto;
 
     public KeyPairDto generateKeyPair() {
         try {
-            return cryptoStrategy.generateKey();
+            return jwtCrypto.generateKey();
         } catch (Exception e) {
-            throw new RuntimeException("Error generating RSA keys", e);
+            throw new RuntimeException("Error generating HMAC keys", e);
         }
     }
 
@@ -38,7 +37,7 @@ public class JwtTokenProvider {
             long now = System.currentTimeMillis();
             long expiryDate = now + appProperties.getJwt().getAccessTokenExpirationMs();
 
-            Key key = cryptoStrategy.getSigningKey(privateKeyStr);
+            Key key = jwtCrypto.getKey(privateKeyStr);
 
             Map<String, Object> claims = objectMapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
             });
@@ -48,7 +47,7 @@ public class JwtTokenProvider {
                     .setSubject(userId.toString())
                     .setIssuedAt(new Date(now))
                     .setExpiration(new Date(expiryDate))
-                    .signWith(key, cryptoStrategy.getAlgorithm())
+                    .signWith(key, jwtCrypto.getAlgorithm())
                     .compact();
         } catch (Exception e) {
             throw new RuntimeException("Could not generate token", e);
@@ -60,13 +59,13 @@ public class JwtTokenProvider {
             long now = System.currentTimeMillis();
             long expiryDate = now + appProperties.getJwt().getRefreshTokenExpirationMs();
 
-            Key key = cryptoStrategy.getSigningKey(privateKeyStr);
+            Key key = jwtCrypto.getKey(privateKeyStr);
 
             return Jwts.builder()
                     .setSubject(userId.toString())
                     .setIssuedAt(new Date(now))
                     .setExpiration(new Date(expiryDate))
-                    .signWith(key, cryptoStrategy.getAlgorithm())
+                    .signWith(key, jwtCrypto.getAlgorithm())
                     .compact();
         } catch (Exception e) {
             throw new RuntimeException("Could not generate refresh token", e);
@@ -91,7 +90,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token, String publicKeyStr) {
         try {
-            Key key = cryptoStrategy.getVerifyingKey(publicKeyStr);
+            Key key = jwtCrypto.getKey(publicKeyStr);
 
             Jwts.parserBuilder()
                     .setSigningKey(key)
@@ -106,7 +105,7 @@ public class JwtTokenProvider {
 
     public Date getExpiryDateFromToken(String token, String publicKeyStr) {
         try {
-            Key key = cryptoStrategy.getVerifyingKey(publicKeyStr);
+            Key key = jwtCrypto.getKey(publicKeyStr);
 
             return Jwts.parserBuilder()
                     .setSigningKey(key)
@@ -121,7 +120,7 @@ public class JwtTokenProvider {
     }
 
     public Claims getAllClaimsFromToken(String token, String publicKeyStr) throws Exception {
-        Key key = cryptoStrategy.getVerifyingKey(publicKeyStr);
+        Key key = jwtCrypto.getKey(publicKeyStr);
 
         return Jwts.parserBuilder()
                 .setSigningKey(key)
