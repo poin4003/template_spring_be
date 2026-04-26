@@ -1,5 +1,6 @@
 package com.app.features.rbac.cqrs.command;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -21,7 +22,6 @@ public record AssignPermToRoleCmd(
         List<UUID> permIds) implements Command<Void> {
 }
 
-
 @Component
 @RequiredArgsConstructor
 class AssignPermToRoleHandler implements Command.Handler<AssignPermToRoleCmd, Void> {
@@ -41,7 +41,7 @@ class AssignPermToRoleHandler implements Command.Handler<AssignPermToRoleCmd, Vo
             throw ExceptionFactory.notFound("Missing some permission");
         }
 
-        role.setPermissions(perms);
+        role.setPermissions(new HashSet<>(perms));
 
         roleRepo.save(role);
 

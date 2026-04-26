@@ -1,6 +1,7 @@
 package com.app.features.rbac.entity;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.app.core.base.BaseEntity;
@@ -36,7 +37,7 @@ public class RoleEntity extends BaseEntity {
         joinColumns = @JoinColumn(name = "role_id"),
         inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
-    private List<PermissionEntity> permissions;
+    private Set<PermissionEntity> permissions;
 
     @ManyToMany(mappedBy = "roles")
     @ToString.Exclude

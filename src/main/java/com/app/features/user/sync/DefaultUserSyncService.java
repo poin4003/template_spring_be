@@ -1,6 +1,6 @@
 package com.app.features.user.sync;
 
-import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,7 +50,7 @@ public class DefaultUserSyncService implements SyncableDataService {
                     .orElseThrow(() -> ExceptionFactory
                             .notFound("Role Super Admin not found! Please check RbacSyncService."));
 
-            superAdminUser.setRoles(List.of(superAdminRole));
+            superAdminUser.setRoles(Set.of(superAdminRole));
 
             userRepo.save(superAdminUser);
         } else {

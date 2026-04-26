@@ -22,7 +22,7 @@ public record GetSimByIdQuery(UUID Id) implements Command<SimResult> {
 class GetSimByIdHandler implements Command.Handler<GetSimByIdQuery, SimResult> {
 
     private final SimRepsitory simRepo;
-    private final ModelMapper modelMapper;
+    private final ModelMapper mapper;
 
     @Override
     public SimResult handle(GetSimByIdQuery query) {
@@ -31,6 +31,6 @@ class GetSimByIdHandler implements Command.Handler<GetSimByIdQuery, SimResult> {
         SimEntity sim = simRepo.findById(id)
                 .orElseThrow(() -> ExceptionFactory.notFound("Sim: " + query.Id()));
 
-        return modelMapper.map(sim, SimResult.class);
+        return mapper.map(sim, SimResult.class);
     }
 }

@@ -3,7 +3,6 @@ package com.app.features.user.entity;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -62,7 +61,7 @@ public class UserBaseEntity extends BaseUserDetailEntity {
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<RoleEntity> roles;
+    private Set<RoleEntity> roles;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -72,7 +71,7 @@ public class UserBaseEntity extends BaseUserDetailEntity {
             return authorities;
 
         authorities.addAll(roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getKey()))
+                .map(role -> new SimpleGrantedAuthority(role.getKey()))
                 .collect(Collectors.toList()));
 
         authorities.addAll(roles.stream()

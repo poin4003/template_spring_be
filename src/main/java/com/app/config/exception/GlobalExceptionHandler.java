@@ -1,15 +1,18 @@
 package com.app.config.exception;
 
+import java.nio.file.AccessDeniedException;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
@@ -65,6 +68,19 @@ public class GlobalExceptionHandler {
         log.warn("Missing Parameter: {}", ex.getMessage());
         ApiResult<Void> response = ApiResult.error("MISSING_PARAM", "Missing param.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler({
+            AuthorizationDeniedException.class,
+            AccessDeniedException.class
+    })
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiResult<Void> handleAccessDeniedException(Exception ex) {
+        log.warn("[Security] Access Denied: {}", ex.getMessage());
+
+        return ApiResult.error(
+                "PERMISSION_ERROR",
+                "You are not authorized to perform this action.");
     }
 
     @ExceptionHandler(Exception.class)

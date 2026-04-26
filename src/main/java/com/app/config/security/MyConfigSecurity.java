@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.app.config.jwt.JwtAuthenticationEntryPoint;
 import com.app.config.jwt.JwtAuthenticationFilter;
 import com.app.features.auth.service.impl.UserDetailServiceImpl;
 
@@ -20,11 +21,12 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @RequiredArgsConstructor
 public class MyConfigSecurity {
 
     private final UserDetailServiceImpl userDetailService;
+    private final JwtAuthenticationEntryPoint jwtEntryPoint;
 
     @Bean 
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthFilter) throws Exception {
@@ -33,6 +35,9 @@ public class MyConfigSecurity {
             .cors(Customizer.withDefaults())
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint(jwtEntryPoint)
+            )
             .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(
                 "/swagger-ui/**", 

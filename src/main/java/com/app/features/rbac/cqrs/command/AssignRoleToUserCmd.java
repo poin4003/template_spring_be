@@ -1,5 +1,6 @@
 package com.app.features.rbac.cqrs.command;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -40,7 +41,7 @@ class AssignRoleToUserHandler implements Command.Handler<AssignRoleToUserCmd, Vo
             throw ExceptionFactory.notFound("Missing some role");
         }
 
-        user.setRoles(roles);
+        user.setRoles(new HashSet<>(roles));
 
         userRepo.save(user);
 

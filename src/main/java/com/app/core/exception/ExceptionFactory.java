@@ -31,8 +31,12 @@ public final class ExceptionFactory {
     }
 
     // --- Security Error (401, 403)
+    public static MyException tokenInvalid(String message) {
+        return new MyException("TOKEN_INVALID", HttpStatus.UNAUTHORIZED.value(), message);
+    }
+
     public static MyException permissionError(String message) {
-        return new MyException("PERMISSION_ERROR", HttpStatus.UNAUTHORIZED.value(), message);
+        return new MyException("PERMISSION_ERROR", HttpStatus.FORBIDDEN.value(), message);
     }
 
     // --- Infrastructure/System Errors (500) ---

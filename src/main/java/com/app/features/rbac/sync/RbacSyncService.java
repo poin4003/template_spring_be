@@ -1,6 +1,7 @@
 package com.app.features.rbac.sync;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -65,7 +66,7 @@ public class RbacSyncService implements SyncableDataService {
                 });
 
         List<PermissionEntity> allPermissions = permRepo.findAll();
-        superAdminRole.setPermissions(allPermissions);
+        superAdminRole.setPermissions(new HashSet<>(allPermissions));
 
         roleRepo.save(superAdminRole);
 

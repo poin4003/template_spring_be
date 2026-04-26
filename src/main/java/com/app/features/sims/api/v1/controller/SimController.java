@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.excel.EasyExcel;
+import com.app.core.constant.PermissionConstants;
 import com.app.core.exception.ExceptionFactory;
 import com.app.core.response.ApiResult;
 import com.app.features.sims.api.v1.dto.query.SimFilterDto;
@@ -61,6 +63,7 @@ public class SimController {
     @PostMapping("")
     @Operation(summary = "Create a new SIM", description = "Create a new SIM")
     @ResponseStatus(HttpStatus.CREATED)
+    @Secured(PermissionConstants.SIM_CREATE)
     public ApiResult<SimDto> createSim(@Valid @RequestBody CreateSimDto req) {
         CreateSimCmd cmd = mapper.map(req, CreateSimCmd.class);
 
@@ -71,6 +74,7 @@ public class SimController {
 
     @PostMapping(value = "/import_sim", consumes = { "multipart/form-data" })
     @Operation(summary = "Import SIM data from Excel file", description = "Uploads an Excel file to push SIM data to Kafka queue.")
+    @Secured(PermissionConstants.SIM_IMPORT)
     public ApiResult<String> importSims(
             @RequestPart("file") @Schema(type = "string", format = "binary") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
@@ -94,6 +98,7 @@ public class SimController {
 
     @GetMapping("")
     @Operation(summary = "Get list of SIM", description = "Get list of SIM")
+    @Secured(PermissionConstants.SIM_VIEW)
     public ApiResult<Page<SimDto>> getManySims(
             @ParameterObject SimFilterDto req,
             @ParameterObject @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -113,6 +118,7 @@ public class SimController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "File Excel successfully created", content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")),
     })
+    @Secured(PermissionConstants.SIM_EXPORT)
     public void exportAllSimToExcel(
             @ParameterObject SimFilterDto req,
             HttpServletResponse res) throws IOException {
@@ -135,6 +141,7 @@ public class SimController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get SIM by ID", description = "Get SIM by ID")
+    @Secured(PermissionConstants.SIM_VIEW)
     public ApiResult<SimDto> getSimById(@PathVariable UUID id) {
         log.info("Controller:-> getSimById | {}", id);
 

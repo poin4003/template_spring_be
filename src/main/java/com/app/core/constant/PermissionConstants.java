@@ -12,6 +12,5 @@ public final class PermissionConstants {
     public static final String SIM_IMPORT = "SIM:IMPORT";
 
     // RBAC Management
-    public static final String RBAC_VIEW = "RBAC:VIEW";
     public static final String RBAC_MANAGE = "RBAC:MANAGE";
 }

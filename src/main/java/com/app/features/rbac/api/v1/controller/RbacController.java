@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.app.core.constant.PermissionConstants;
 import com.app.core.response.ApiResult;
 import com.app.features.rbac.api.v1.dto.query.PermissionFilterDto;
 import com.app.features.rbac.api.v1.dto.query.RoleFilterDto;
@@ -52,6 +54,7 @@ import lombok.RequiredArgsConstructor;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/rbac")
+@Secured(PermissionConstants.RBAC_MANAGE)
 @Tag(name = "RBAC Management V1", description = "RBAC docs")
 public class RbacController {
 
