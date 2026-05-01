@@ -29,7 +29,7 @@ public class CreateSimCmd implements Command<SimResult> {
 class CreateSimHandler implements Command.Handler<CreateSimCmd, SimResult> {
 
     private final SimRepsitory simRepo;
-    private final ModelMapper modelMapper;
+    private final ModelMapper mapper;
 
     @Override
     public SimResult handle(CreateSimCmd cmd) {
@@ -46,6 +46,6 @@ class CreateSimHandler implements Command.Handler<CreateSimCmd, SimResult> {
 
         simRepo.save(sim);
 
-        return modelMapper.map(sim, SimResult.class);
+        return mapper.map(sim, SimResult.class);
     }
 }

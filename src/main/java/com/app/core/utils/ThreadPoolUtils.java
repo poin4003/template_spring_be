@@ -1,4 +1,4 @@
-package com.app.utils;
+package com.app.core.utils;
 
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 

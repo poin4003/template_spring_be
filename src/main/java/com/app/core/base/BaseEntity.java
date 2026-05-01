@@ -6,6 +6,5 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public abstract class BaseEntity extends BaseAuditEntity {
-    private String note;
-    private String description;
+
 }

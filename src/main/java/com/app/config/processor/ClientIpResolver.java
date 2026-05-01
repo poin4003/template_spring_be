@@ -12,7 +12,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import com.app.core.annotation.ClientIp;
-import com.app.utils.HttpUtils;
+import com.app.core.utils.HttpUtils;
 
 @Component
 @RequiredArgsConstructor

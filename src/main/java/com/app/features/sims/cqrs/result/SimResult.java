@@ -19,6 +19,4 @@ public class SimResult {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String note;
-    private String description;
 }

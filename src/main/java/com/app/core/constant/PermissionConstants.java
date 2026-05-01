@@ -13,4 +13,7 @@ public final class PermissionConstants {
 
     // RBAC Management
     public static final String RBAC_MANAGE = "RBAC:MANAGE";
+
+    // WEBHOOK Management
+    public static final String WEBHOOK_MANAGE = "WEBHOOK:MANAGE";
 }

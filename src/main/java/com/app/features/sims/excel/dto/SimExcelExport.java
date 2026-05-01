@@ -32,10 +32,4 @@ public class SimExcelExport {
     @ExcelProperty("Updated at")
     @DateTimeFormat("dd-MM-yyyy HH:mm:ss")
     private String updatedAt;
-
-    @ExcelProperty("Note")
-    private String note;
-
-    @ExcelProperty("Description")
-    private String description;
 }

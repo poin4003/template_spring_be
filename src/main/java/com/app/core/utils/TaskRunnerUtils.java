@@ -1,4 +1,4 @@
-package com.app.utils;
+package com.app.core.utils;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
